@@ -13,7 +13,7 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID ?? "",
       clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
-      authorization: { params: { scope: "read:user repo" } }, // repo scope powers GitHub analytics + AI code review
+      authorization: { params: { scope: "read:user user:email repo" } }, // repo scope powers GitHub analytics + AI code review
     }),
   ],
   session: { strategy: "database" },
