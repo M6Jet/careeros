@@ -1,19 +1,14 @@
 import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default async function Page() {
+export default async function Home() {
   const session = await auth();
+  if (!session) redirect("/signin");
   return (
-    <div>
-      <h1>Dashboard</h1>
-      {!session ? (
-        <div className="card">Sign in via <a href="/api/auth/signin">SSO</a> to load your dashboard.</div>
-      ) : (
-        <div className="card">
-          dashboard data is served by <code>/api/goals, /api/jobs, /api/certs</code>.
-          Port the module UI from <code>standalone/CareerOS.html</code> (all view logic is
-          framework-agnostic vanilla JS) or build with your component library of choice.
-        </div>
-      )}
-    </div>
+    <iframe
+      src="/app.html"
+      allow="microphone; clipboard-write"
+      style={{ position: "fixed", inset: 0, width: "100%", height: "100%", border: "none" }}
+    />
   );
 }
