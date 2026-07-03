@@ -1,6 +1,11 @@
 // CareerOS data model
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 model User {
   id            String    @id @default(cuid())
@@ -28,7 +33,12 @@ model User {
   createdAt     DateTime  @default(now())
 }
 
-enum Role { USER MENTOR COACH ADMIN }
+enum Role {
+  USER
+  MENTOR
+  COACH
+  ADMIN
+}
 
 model Account {
   id                String  @id @default(cuid())
@@ -71,7 +81,15 @@ model ResumeVersion {
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 }
 
-enum Stage { WISHLIST APPLIED ONLINE_ASSESSMENT PHONE_SCREEN ONSITE OFFER REJECTED }
+enum Stage {
+  WISHLIST
+  APPLIED
+  ONLINE_ASSESSMENT
+  PHONE_SCREEN
+  ONSITE
+  OFFER
+  REJECTED
+}
 model Job {
   id             String   @id @default(cuid())
   userId         String
