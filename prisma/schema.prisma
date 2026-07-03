@@ -1,0 +1,233 @@
+// CareerOS data model
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  role          Role      @default(USER)
+  targetRole    String    @default("Backend Engineer")
+  targetMonths  Int       @default(12)
+  theme         String    @default("dark")
+  widgets       Json      @default("{}")
+  accounts      Account[]
+  sessions      Session[]
+  resumes       Resume[]
+  jobs          Job[]
+  contacts      Contact[]
+  ivSessions    InterviewSession[]
+  certs         Certification[]
+  learning      LearningItem[]
+  goals         Goal[]
+  coachMessages CoachMessage[]
+  activities    ActivityDay[]
+  automations   Automation[]
+  githubProfile GithubProfile?
+  createdAt     DateTime  @default(now())
+}
+
+enum Role { USER MENTOR COACH ADMIN }
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Resume {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  target    String   @default("Backend Engineer")
+  sections  Json     // {summary, skills, experience[], education, projects}
+  updatedAt DateTime @updatedAt
+  versions  ResumeVersion[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model ResumeVersion {
+  id        String   @id @default(cuid())
+  resumeId  String
+  snapshot  Json
+  createdAt DateTime @default(now())
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+enum Stage { WISHLIST APPLIED ONLINE_ASSESSMENT PHONE_SCREEN ONSITE OFFER REJECTED }
+model Job {
+  id             String   @id @default(cuid())
+  userId         String
+  company        String
+  role           String
+  link           String?
+  description    String?  @db.Text
+  stage          Stage    @default(WISHLIST)
+  salaryMin      Int?
+  salaryMax      Int?
+  compNotes      String?
+  recruiterName  String?
+  recruiterEmail String?
+  recruiterPhone String?
+  followUpAt     DateTime?
+  notes          String?  @db.Text
+  rejectionReason String?
+  rejectionTags  String[]
+  offer          Json?    // {base,bonus,equity,benefits,location,remote}
+  interviews     Interview[]
+  statusLog      Json     @default("[]")
+  createdAt      DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, stage])
+}
+model Interview {
+  id      String   @id @default(cuid())
+  jobId   String
+  type    String
+  scheduledAt DateTime
+  notes   String?
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  role      String?
+  company   String?
+  type      String   @default("Peer") // Mentor, Mentee, Recruiter, Alumni, Peer
+  email     String?
+  linkedin  String?
+  notes     String?  @db.Text
+  followUpAt DateTime?
+  interactions Interaction[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model Interaction {
+  id        String   @id @default(cuid())
+  contactId String
+  kind      String   // LinkedIn, Email, Call, Coffee chat, Meeting
+  note      String   @db.Text
+  occurredAt DateTime @default(now())
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+}
+
+model InterviewSession {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String   // behavioral | technical | coding | design
+  score      Int
+  clarity    Int?
+  confidence Int?
+  durationMin Int?
+  transcript Json     // encrypted at rest via app-layer AES-GCM (see lib/crypto.ts)
+  createdAt  DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Certification {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  provider    String
+  progress    Int      @default(0)
+  targetDate  DateTime?
+  dailyMinutes Int     @default(30)
+  weeklyTopics Int     @default(1)
+  flashcards  Flashcard[]
+  examAttempts ExamAttempt[]
+  completedAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model Flashcard {
+  id      String @id @default(cuid())
+  certId  String
+  front   String @db.Text
+  back    String @db.Text
+  box     Int    @default(1) // Leitner spaced-repetition box
+  cert Certification @relation(fields: [certId], references: [id], onDelete: Cascade)
+}
+model ExamAttempt {
+  id      String   @id @default(cuid())
+  certId  String
+  score   Int
+  total   Int      @default(100)
+  answers Json?
+  takenAt DateTime @default(now())
+  cert Certification @relation(fields: [certId], references: [id], onDelete: Cascade)
+}
+
+model LearningItem {
+  id       String   @id @default(cuid())
+  userId   String
+  title    String
+  type     String   // Book, Course, Degree, Coding practice, Project, Lab
+  total    Int
+  done     Int      @default(0)
+  unit     String   @default("units")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Goal {
+  id     String  @id @default(cuid())
+  userId String
+  text   String
+  kind   String  @default("weekly") // weekly | daily
+  done   Boolean @default(false)
+  date   DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityDay {
+  id     String   @id @default(cuid())
+  userId String
+  day    DateTime @db.Date
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, day])
+}
+
+model CoachMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String   // user | assistant
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Automation {
+  id      String  @id @default(cuid())
+  userId  String
+  trigger String  // cert_complete | rejection | offer_received
+  action  String
+  enabled Boolean @default(true)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GithubProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  username    String
+  accessToken String?  @db.Text // OAuth token (encrypted)
+  stats       Json?
+  showcase    String[]
+  syncedAt    DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

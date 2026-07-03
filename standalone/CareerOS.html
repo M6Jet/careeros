@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerOS — AI Career Operating System</title>
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;
+  --accent:#58a6ff;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;--purple:#bc8cff;
+  --card-shadow:0 1px 3px rgba(0,0,0,.4);--radius:10px;
+}
+[data-theme="light"]{
+  --bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--border:#d0d7de;--text:#1f2328;--muted:#656d76;
+  --accent:#0969da;--accent2:#1a7f37;--warn:#9a6700;--danger:#cf222e;--purple:#8250df;
+  --card-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+#app{display:flex;min-height:100vh}
+/* Sidebar */
+#sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;bottom:0;left:0;overflow-y:auto;z-index:50;display:flex;flex-direction:column}
+#sidebar .logo{padding:16px;font-size:17px;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+#sidebar .logo span{color:var(--accent)}
+#sidebar nav{flex:1;padding:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-size:14px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg3);color:var(--text);box-shadow:inset 3px 0 0 var(--accent)}
+.nav-item .ico{width:18px;text-align:center}
+#sidebar .foot{padding:12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+/* Main */
+#main{flex:1;margin-left:220px;display:flex;flex-direction:column;min-width:0}
+#topbar{display:flex;align-items:center;gap:12px;padding:12px 24px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+#topbar h1{font-size:17px;flex:0 0 auto;margin-right:8px}
+#searchwrap{position:relative;flex:1;max-width:420px}
+#globalsearch{width:100%;padding:7px 12px 7px 32px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px}
+#searchwrap::before{content:"🔍";position:absolute;left:9px;top:7px;font-size:12px;opacity:.6}
+#searchresults{position:absolute;top:38px;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-height:380px;overflow-y:auto;display:none;z-index:100}
+#searchresults .sr{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border)}
+#searchresults .sr:hover{background:var(--bg3)}
+#searchresults .sr .t{font-weight:600;font-size:13px}
+#searchresults .sr .s{font-size:12px;color:var(--muted)}
+#content{padding:24px;flex:1;max-width:1200px;width:100%}
+/* Components */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--card-shadow)}
+.card h3{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.big{font-size:28px;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;font-size:13px;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.success{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn.danger{color:var(--danger);border-color:var(--danger);background:transparent}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn.ghost{background:transparent}
+input,select,textarea{background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:13px;font-family:inherit;width:100%}
+textarea{resize:vertical;min-height:70px}
+label{font-size:12px;font-weight:600;color:var(--muted);display:block;margin:10px 0 4px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg3);border:1px solid var(--border)}
+.badge.blue{color:var(--accent);border-color:var(--accent)}
+.badge.green{color:var(--accent2);border-color:var(--accent2)}
+.badge.yellow{color:var(--warn);border-color:var(--warn)}
+.badge.red{color:var(--danger);border-color:var(--danger)}
+.badge.purple{color:var(--purple);border-color:var(--purple)}
+.muted{color:var(--muted)}.small{font-size:12px}.mt{margin-top:12px}.mb{margin-bottom:12px}
+.progress{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.progress>div{height:100%;background:var(--accent);border-radius:4px;transition:width .3s}
+.progress.green>div{background:var(--accent2)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:1px solid var(--border)}
+td{padding:9px 8px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top}
+tr:hover td{background:var(--bg3)}
+/* Kanban */
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+.kcol{min-width:210px;flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px}
+.kcol h4{font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+.kcard{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer}
+.kcard:hover{border-color:var(--accent)}
+.kcard .co{font-weight:600;font-size:13px}
+.kcard .ro{font-size:12px;color:var(--muted)}
+/* Modal */
+#modalbg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 16px}
+#modalbg.open{display:flex}
+#modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:100%;max-width:640px;padding:22px;box-shadow:0 16px 48px rgba(0,0,0,.5)}
+#modal h2{font-size:16px;margin-bottom:8px}
+/* Toast */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:10px;font-size:13px;display:none;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+/* Chat */
+.chat{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:400px}
+.chatlog{flex:1;overflow-y:auto;padding:6px 2px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:82%;padding:10px 14px;border-radius:12px;white-space:pre-wrap;font-size:13.5px}
+.msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--bg2);border:1px solid var(--border);border-bottom-left-radius:4px}
+/* Bars chart */
+.bars{display:flex;align-items:flex-end;gap:6px;height:110px}
+.bars .bar{flex:1;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.bars .bar span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
+.bars .bar b{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:10px}
+/* Score ring */
+.ring{position:relative;width:120px;height:120px}
+.ring svg{transform:rotate(-90deg)}
+.ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:26px;font-weight:700}
+.ring .val small{font-size:10px;color:var(--muted);font-weight:400}
+/* Flashcard */
+.flashcard{background:var(--bg2);border:1px solid var(--border);border-radius:14px;min-height:180px;display:flex;align-items:center;justify-content:center;padding:26px;font-size:17px;text-align:center;cursor:pointer;user-select:none}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 14px;cursor:pointer;color:var(--muted);font-weight:500;font-size:13px;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none}
+.tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.checkitem{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.checkitem input[type=checkbox]{width:auto}
+.checkitem.done label{text-decoration:line-through;color:var(--muted)}
+.checkitem label{margin:0;font-weight:400;font-size:13px;color:var(--text);flex:1;cursor:pointer}
+.diffline{font-family:ui-monospace,monospace;font-size:12px;padding:1px 8px;white-space:pre-wrap}
+.diffline.add{background:rgba(63,185,80,.15);color:var(--accent2)}
+.diffline.del{background:rgba(248,81,73,.15);color:var(--danger)}
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.empty{text-align:center;padding:36px;color:var(--muted)}
+.streakbox{display:flex;gap:3px;flex-wrap:wrap}
+.streakbox .d{width:12px;height:12px;border-radius:3px;background:var(--bg3)}
+.streakbox .d.on{background:var(--accent2)}
+@media(max-width:800px){#sidebar{width:60px}#sidebar .logo{font-size:0;padding:16px 8px}#sidebar .logo::before{content:"🚀";font-size:20px}.nav-item{justify-content:center}.nav-item .lbl{display:none}#main{margin-left:60px}#sidebar .foot{display:none}}
+@media print{#sidebar,#topbar,.no-print{display:none!important}#main{margin:0}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="logo">🚀 Career<span>OS</span></div>
+    <nav id="nav"></nav>
+    <div class="foot">CareerOS v1.0<br>All data stays in your browser.</div>
+  </aside>
+  <div id="main">
+    <div id="topbar">
+      <h1 id="pagetitle">Dashboard</h1>
+      <div id="searchwrap">
+        <input id="globalsearch" placeholder="Search jobs, contacts, resumes, notes…" autocomplete="off">
+        <div id="searchresults"></div>
+      </div>
+      <button class="btn sm ghost" onclick="toggleTheme()" id="themebtn" title="Toggle theme">🌙</button>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+<div id="modalbg" onclick="if(event.target===this)closeModal()"><div id="modal"></div></div>
+<div id="toast"></div>
+<script>
+"use strict";
+/* ============ STATE ============ */
+const LS_KEY="careeros_v1";
+const uid=()=>Math.random().toString(36).slice(2,10);
+const today=()=>new Date().toISOString().slice(0,10);
+const now=()=>new Date().toISOString();
+function defaultState(){
+  return {
+    settings:{theme:"dark",name:"Mason",targetRole:"Backend Engineer",targetTimeline:12,
+      widgets:{readiness:true,goals:true,focus:true,interviews:true,pipeline:true,certs:true,github:true,learning:true,salary:true}},
+    goals:[],tasks:[],resumes:[],jobs:[],contacts:[],sessions:[],certs:[],learning:[],
+    github:{username:"",data:null,showcase:[],lastSync:null},
+    coach:[],activity:{},automations:[
+      {id:uid(),trigger:"cert_complete",action:"Add resume-update + LinkedIn post tasks",on:true},
+      {id:uid(),trigger:"offer_received",action:"Create offer comparison reminder",on:true},
+      {id:uid(),trigger:"rejection",action:"Log reason + suggest skill focus",on:true}
+    ]
+  };
+}
+let S=load();
+function load(){try{const raw=localStorage.getItem(LS_KEY);if(raw){const s=JSON.parse(raw);return Object.assign(defaultState(),s);}}catch(e){}const s=seed(defaultState());localStorage.setItem(LS_KEY,JSON.stringify(s));return s;}
+function save(){localStorage.setItem(LS_KEY,JSON.stringify(S));}
+function seed(s){
+  const d=(off)=>{const t=new Date();t.setDate(t.getDate()+off);return t.toISOString().slice(0,10);};
+  s.goals=[{id:uid(),text:"Apply to 5 backend roles",done:false},{id:uid(),text:"Finish AWS SAA practice exam #2",done:false},{id:uid(),text:"Two mock interviews (1 behavioral, 1 system design)",done:false},{id:uid(),text:"Reach out to 3 contacts",done:true}];
+  s.tasks=[{id:uid(),text:"Solve 2 LeetCode mediums (graphs)",done:false,date:today()},{id:uid(),text:"Rewrite top 3 resume bullets with metrics",done:false,date:today()},{id:uid(),text:"30 min AWS flashcards",done:true,date:today()}];
+  s.resumes=[{id:uid(),name:"Backend Engineer v3",target:"Backend Engineer",updated:now(),history:[],
+    sections:{summary:"Software engineer with 3 years of experience building web services in Node.js and Python. Passionate about distributed systems, API design, and developer tooling.",
+    skills:"JavaScript, TypeScript, Node.js, Python, PostgreSQL, Docker, REST APIs, Git, AWS (EC2, S3, Lambda), Redis",
+    experience:[{company:"Acme Corp",role:"Software Engineer II",dates:"2024 – Present",bullets:["Responsible for maintaining the order processing service","Reduced API p95 latency from 800ms to 180ms by adding Redis caching and query optimization","Worked on the migration to microservices","Mentored 2 junior engineers through onboarding and code reviews"]},
+      {company:"StartupXYZ",role:"Junior Developer",dates:"2022 – 2024",bullets:["Helped build the customer dashboard in React","Built CI pipeline with GitHub Actions cutting deploy time by 60%","Was involved in on-call rotation"]}],
+    education:"B.S. Computer Science, Kennesaw State University — 2022",
+    projects:"DevDash — open-source developer metrics dashboard (Node.js, PostgreSQL, 240+ GitHub stars)"}}];
+  s.jobs=[
+    {id:uid(),company:"Stripe",role:"Backend Engineer",link:"",jd:"Build and scale payment APIs. Requirements: strong experience with distributed systems, API design, Go or Java, PostgreSQL, event-driven architecture, observability.",stage:"phone_screen",salaryMin:165000,salaryMax:210000,compNotes:"L2 band per levels.fyi",recruiter:{name:"Dana Kim",email:"dana@stripe.example",phone:""},interviews:[{id:uid(),type:"Phone screen — coding",date:d(3)+"T14:00"}],followUp:d(1),offer:null,rejection:null,notes:"Referred by Priya.",created:d(-12),statusLog:[{stage:"applied",date:d(-12)},{stage:"phone_screen",date:d(-4)}]},
+    {id:uid(),company:"Datadog",role:"Software Engineer, Backend",link:"",jd:"Work on high-throughput ingestion pipelines. Go, Kafka, Cassandra, Kubernetes. Strong CS fundamentals, system design.",stage:"applied",salaryMin:150000,salaryMax:190000,compNotes:"",recruiter:{name:"",email:"",phone:""},interviews:[],followUp:d(4),offer:null,rejection:null,notes:"",created:d(-6),statusLog:[{stage:"applied",date:d(-6)}]},
+    {id:uid(),company:"Shopify",role:"Senior Backend Developer",link:"",jd:"Ruby/Rails or Node.js services at scale. Mentorship, system design, GraphQL APIs, MySQL, caching strategies.",stage:"onsite",salaryMin:160000,salaryMax:200000,compNotes:"Flex comp model",recruiter:{name:"Marc Boucher",email:"marc@shopify.example",phone:""},interviews:[{id:uid(),type:"Virtual onsite — system design",date:d(7)+"T10:00"},{id:uid(),type:"Virtual onsite — values",date:d(7)+"T13:00"}],followUp:"",offer:null,rejection:null,notes:"",created:d(-20),statusLog:[{stage:"applied",date:d(-20)},{stage:"phone_screen",date:d(-10)},{stage:"onsite",date:d(-2)}]},
+    {id:uid(),company:"CloudNine (startup)",role:"Full-Stack Engineer",link:"",jd:"TypeScript, React, Node, Postgres. Small team, high ownership.",stage:"offer",salaryMin:140000,salaryMax:155000,compNotes:"",recruiter:{name:"Alex Rivera",email:"alex@cloudnine.example",phone:""},interviews:[],followUp:d(2),offer:{base:150000,bonus:10000,equity:"0.15% (4yr vest)",benefits:"Health/dental/vision, 401k 4% match",location:"Atlanta, GA",remote:"Hybrid (2 days)"},rejection:null,notes:"Deadline to respond: next Friday",created:d(-30),statusLog:[{stage:"applied",date:d(-30)},{stage:"onsite",date:d(-9)},{stage:"offer",date:d(-1)}]},
+    {id:uid(),company:"Google",role:"Software Engineer III",link:"",jd:"Generalist SWE. Strong algorithms, system design, distributed systems.",stage:"rejected",salaryMin:170000,salaryMax:220000,compNotes:"",recruiter:{name:"",email:"",phone:""},interviews:[],followUp:"",offer:null,rejection:{reason:"Did not pass onsite — feedback cited system design depth",tags:["system design"]},notes:"Re-apply after 12 months",created:d(-60),statusLog:[{stage:"applied",date:d(-60)},{stage:"onsite",date:d(-35)},{stage:"rejected",date:d(-28)}]},
+    {id:uid(),company:"Netflix",role:"Backend Engineer, Streaming",link:"",jd:"Java, distributed systems, high scale.",stage:"wishlist",salaryMin:0,salaryMax:0,compNotes:"",recruiter:{name:"",email:"",phone:""},interviews:[],followUp:"",offer:null,rejection:null,notes:"Wait until system design prep is stronger",created:d(-3),statusLog:[]}
+  ];
+  s.contacts=[
+    {id:uid(),name:"Priya Sharma",role:"Staff Engineer",company:"Stripe",type:"Mentor",linkedin:"",email:"priya@example.com",notes:"Met at RenderATL. Offered referral.",interactions:[{date:d(-8),kind:"Coffee chat",note:"Discussed distributed systems learning path; she suggested DDIA book."},{date:d(-30),kind:"LinkedIn",note:"Initial connect + thanks"}],followUp:d(5)},
+    {id:uid(),name:"Marcus Lee",role:"Engineering Manager",company:"Datadog",type:"Recruiter/Hiring",linkedin:"",email:"",notes:"Responded to cold outreach.",interactions:[{date:d(-15),kind:"LinkedIn",note:"Asked about team openings"}],followUp:d(1)},
+    {id:uid(),name:"Jen Ortiz",role:"SWE",company:"Google",type:"Alumni",linkedin:"",email:"",notes:"KSU alum, same graduating class.",interactions:[{date:d(-45),kind:"Message",note:"Congratulated on new role"}],followUp:""},
+    {id:uid(),name:"Sam Chen",role:"Bootcamp peer",company:"Shopify",type:"Peer",linkedin:"",email:"",notes:"Study buddy for system design.",interactions:[{date:d(-2),kind:"Call",note:"Mock system design session — URL shortener"}],followUp:d(7)}
+  ];
+  s.certs=[
+    {id:uid(),name:"AWS Solutions Architect Associate",provider:"AWS",targetDate:d(45),progress:62,plan:{dailyMin:45,weeklyTopics:2},flashcards:[
+      {id:uid(),front:"What S3 storage class is cheapest for rarely-accessed data with retrieval in hours?",back:"S3 Glacier Deep Archive",box:2},
+      {id:uid(),front:"Max size of a single S3 object?",back:"5 TB",box:1},
+      {id:uid(),front:"Which service provides managed NAT for private subnets?",back:"NAT Gateway",box:3}],
+      examHistory:[{date:d(-10),score:68,total:100},{date:d(-3),score:74,total:100}]},
+    {id:uid(),name:"CompTIA Security+",provider:"CompTIA",targetDate:d(120),progress:15,plan:{dailyMin:30,weeklyTopics:1},flashcards:[],examHistory:[]}
+  ];
+  s.learning=[
+    {id:uid(),title:"Designing Data-Intensive Applications",type:"Book",total:600,done:210,unit:"pages",log:[d(-1),d(-2),d(-4),d(-5),d(-6)]},
+    {id:uid(),title:"LeetCode — NeetCode 150",type:"Coding practice",total:150,done:87,unit:"problems",log:[d(0),d(-1),d(-2),d(-3),d(-5),d(-6),d(-7)]},
+    {id:uid(),title:"WGU B.S. Software Engineering",type:"Degree",total:120,done:78,unit:"credits",log:[d(-3)]},
+    {id:uid(),title:"System Design Primer (course)",type:"Course",total:24,done:9,unit:"modules",log:[d(-2),d(-9)]},
+    {id:uid(),title:"DevDash side project v2",type:"Project",total:12,done:5,unit:"milestones",log:[d(-4)]}
+  ];
+  const t=new Date();for(let i=0;i<40;i++){const dt=new Date(t);dt.setDate(dt.getDate()-i);if(i%7!==3&&i%11!==5)s.activity[dt.toISOString().slice(0,10)]=true;}
+  s.coach=[{role:"ai",text:"Hi Mason! I'm your AI career coach. I can see your resumes, job pipeline, learning progress, certifications, and GitHub stats. Try asking:\n\n• \"What should I study today?\"\n• \"Am I ready for a Google interview?\"\n• \"What skills am I missing for senior backend roles?\"\n• \"Write a follow-up message to my Stripe recruiter.\""}];
+  return s;
+}
+/* ============ HELPERS ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt$=n=>n?("$"+Number(n).toLocaleString()):"—";
+const fmtDate=s=>{if(!s)return"—";const d=new Date(s.length<=10?s+"T00:00":s);return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});};
+const daysUntil=s=>{if(!s)return null;return Math.ceil((new Date(s.slice(0,10)+"T00:00")-new Date(today()+"T00:00"))/864e5);};
+function toast(msg){const t=$("#toast");t.textContent=msg;t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",2600);}
+function openModal(html){$("#modal").innerHTML=html;$("#modalbg").classList.add("open");}
+function closeModal(){$("#modalbg").classList.remove("open");}
+function download(name,content,type){const b=new Blob([content],{type:type||"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function markActive(){S.activity[today()]=true;save();}
+function ring(pct,color,label){const r=52,c=2*Math.PI*r;const col=color||"var(--accent)";return `<div class="ring"><svg width="120" height="120"><circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="10"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct/100)}"/></svg><div class="val">${Math.round(pct)}<small>${label||""}</small></div></div>`;}
+/* ============ NAV ============ */
+const VIEWS=[
+  ["dashboard","🏠","Dashboard"],["resume","📄","Resume Manager"],["jobs","💼","Job Tracker"],
+  ["network","🤝","Networking CRM"],["interview","🎤","Interview Center"],["certs","🏅","Certifications"],
+  ["learning","📚","Learning"],["github","🐙","GitHub"],["coach","🤖","AI Coach"],
+  ["analytics","📊","Analytics"],["settings","⚙️","Settings"]
+];
+let CUR="dashboard";
+function nav(v,arg){CUR=v;window._navArg=arg;render();window.scrollTo(0,0);}
+function render(){
+  $("#nav").innerHTML=VIEWS.map(([k,i,l])=>`<button class="nav-item ${CUR===k?"active":""}" onclick="nav('${k}')"><span class="ico">${i}</span><span class="lbl">${l}</span></button>`).join("");
+  const meta=VIEWS.find(v=>v[0]===CUR);$("#pagetitle").textContent=meta?meta[2]:"";
+  const fn={dashboard:viewDashboard,resume:viewResume,jobs:viewJobs,network:viewNetwork,interview:viewInterview,certs:viewCerts,learning:viewLearning,github:viewGithub,coach:viewCoach,analytics:viewAnalytics,settings:viewSettings}[CUR];
+  $("#content").innerHTML=fn?fn():"";
+  if(CUR==="coach"){const l=$("#chatlog");if(l)l.scrollTop=l.scrollHeight;}
+}
+/* ============ THEME ============ */
+function applyTheme(){document.documentElement.setAttribute("data-theme",S.settings.theme);$("#themebtn").textContent=S.settings.theme==="dark"?"🌙":"☀️";}
+function toggleTheme(){S.settings.theme=S.settings.theme==="dark"?"light":"dark";save();applyTheme();}
+/* ============ GLOBAL SEARCH ============ */
+$("#globalsearch").addEventListener("input",e=>{
+  const q=e.target.value.trim().toLowerCase();const box=$("#searchresults");
+  if(q.length<2){box.style.display="none";return;}
+  const hits=[];
+  S.jobs.forEach(j=>{if((j.company+" "+j.role+" "+(j.notes||"")+" "+(j.jd||"")).toLowerCase().includes(q))hits.push({t:`💼 ${j.company} — ${j.role}`,s:"Job · "+stageLabel(j.stage),go:()=>nav("jobs",j.id)});});
+  S.contacts.forEach(c=>{if((c.name+" "+c.company+" "+c.role+" "+(c.notes||"")).toLowerCase().includes(q))hits.push({t:`🤝 ${c.name}`,s:"Contact · "+c.company,go:()=>nav("network",c.id)});});
+  S.resumes.forEach(r=>{if(JSON.stringify(r.sections).toLowerCase().includes(q)||r.name.toLowerCase().includes(q))hits.push({t:`📄 ${r.name}`,s:"Resume",go:()=>nav("resume",r.id)});});
+  S.learning.forEach(l=>{if(l.title.toLowerCase().includes(q))hits.push({t:`📚 ${l.title}`,s:"Learning · "+l.type,go:()=>nav("learning")});});
+  S.certs.forEach(c=>{if(c.name.toLowerCase().includes(q))hits.push({t:`🏅 ${c.name}`,s:"Certification",go:()=>nav("certs",c.id)});
+    c.flashcards.forEach(f=>{if((f.front+" "+f.back).toLowerCase().includes(q))hits.push({t:`🃏 ${f.front.slice(0,60)}`,s:"Flashcard · "+c.name,go:()=>nav("certs",c.id)});});});
+  S.sessions.forEach(ss=>{if(JSON.stringify(ss.transcript||[]).toLowerCase().includes(q))hits.push({t:`🎤 ${ss.type} session`,s:"Interview · "+fmtDate(ss.date),go:()=>nav("interview")});});
+  window._srHits=hits.slice(0,12);
+  box.innerHTML=window._srHits.length?window._srHits.map((h,i)=>`<div class="sr" onclick="_srGo(${i})"><div class="t">${esc(h.t)}</div><div class="s">${esc(h.s)}</div></div>`).join(""):`<div class="sr"><div class="s">No results</div></div>`;
+  box.style.display="block";
+});
+function _srGo(i){$("#searchresults").style.display="none";$("#globalsearch").value="";window._srHits[i].go();}
+document.addEventListener("click",e=>{if(!e.target.closest("#searchwrap"))$("#searchresults").style.display="none";});
+/* ============ SKILLS / ROLES DATA ============ */
+const ROLE_SKILLS={
+"Backend Engineer":["API design","SQL / PostgreSQL","System design","Caching (Redis)","Message queues (Kafka/SQS)","Docker","Kubernetes","Testing","Observability / monitoring","Cloud (AWS/GCP)","Data structures & algorithms","Authentication / security"],
+"Frontend Engineer":["React","TypeScript","CSS / responsive design","State management","Testing (Jest/Cypress)","Accessibility","Performance optimization","Build tooling","REST/GraphQL consumption","Design systems"],
+"Full-Stack Engineer":["React","Node.js","TypeScript","SQL","API design","Testing","Docker","Cloud (AWS/GCP)","CI/CD","System design"],
+"DevOps Engineer":["Linux","Docker","Kubernetes","Terraform / IaC","CI/CD","Cloud (AWS/GCP/Azure)","Monitoring (Prometheus/Datadog)","Scripting (Bash/Python)","Networking","Security basics"],
+"Data Engineer":["SQL","Python","ETL / pipelines","Spark","Airflow","Data warehousing","Kafka / streaming","Cloud data services","Data modeling","dbt"],
+"ML Engineer":["Python","PyTorch/TensorFlow","ML fundamentals","Data pipelines","Model deployment","SQL","Cloud ML services","Experiment tracking","Statistics","LLM / prompt engineering"],
+"Mobile Engineer":["Swift or Kotlin","React Native/Flutter","Mobile UI patterns","App store deployment","Offline sync","Push notifications","Testing","Performance profiling"],
+"Security Engineer":["Networking","Linux","Threat modeling","OWASP Top 10","SIEM tools","Scripting (Python)","Cloud security","Incident response","Cryptography basics","Compliance frameworks"]};
+const SALARY_BANDS={"Backend Engineer":[95,135,175],"Frontend Engineer":[90,130,165],"Full-Stack Engineer":[92,132,170],"DevOps Engineer":[100,140,180],"Data Engineer":[100,140,180],"ML Engineer":[115,155,200],"Mobile Engineer":[95,135,172],"Security Engineer":[105,145,185]};
+function resumeSkillsList(r){return (r?.sections.skills||"").split(/[,;]/).map(s=>s.trim()).filter(Boolean);}
+function skillGap(role,resume){
+  const need=ROLE_SKILLS[role]||ROLE_SKILLS["Backend Engineer"];
+  const haveText=(resume?JSON.stringify(resume.sections):"").toLowerCase()+" "+S.learning.map(l=>l.title).join(" ").toLowerCase()+" "+S.certs.map(c=>c.name).join(" ").toLowerCase();
+  const have=[],missing=[];
+  need.forEach(sk=>{const keys=sk.toLowerCase().split(/[\/\(\)]/).map(x=>x.trim()).filter(x=>x.length>2);(keys.some(k=>haveText.includes(k))?have:missing).push(sk);});
+  return {have,missing,coverage:Math.round(100*have.length/need.length)};
+}
+</script>
+<script>
+/* ============ READINESS & DASHBOARD ============ */
+function resumeScore(r){
+  if(!r)return 0;let sc=40;const sec=r.sections;
+  const bullets=sec.experience.flatMap(e=>e.bullets);
+  const quant=bullets.filter(b=>/\d/.test(b)).length;
+  sc+=Math.min(20,quant*5);
+  sc+=Math.min(10,resumeSkillsList(r).length);
+  if(sec.summary&&sec.summary.length>60)sc+=8;
+  if(sec.projects)sc+=7;if(sec.education)sc+=5;
+  const weak=bullets.filter(b=>/^(responsible for|worked on|helped|was involved|assisted)/i.test(b.trim())).length;
+  sc-=weak*4;
+  return Math.max(5,Math.min(100,sc));
+}
+function interviewAvg(){const scored=S.sessions.filter(s=>s.score!=null);return scored.length?Math.round(scored.reduce((a,s)=>a+s.score,0)/scored.length):0;}
+function streakDays(){let n=0;const t=new Date();for(;;){const k=t.toISOString().slice(0,10);if(S.activity[k]){n++;t.setDate(t.getDate()-1);}else{if(n===0&&k===today()){t.setDate(t.getDate()-1);if(S.activity[t.toISOString().slice(0,10)]){continue;}}break;}}return n;}
+function consistency(){let c=0;const t=new Date();for(let i=0;i<28;i++){const d=new Date(t);d.setDate(d.getDate()-i);if(S.activity[d.toISOString().slice(0,10)])c++;}return Math.round(100*c/28);}
+function pipelineCounts(){const c={};S.jobs.forEach(j=>c[j.stage]=(c[j.stage]||0)+1);return c;}
+function readiness(){
+  const r=S.resumes[0]?Math.max(...S.resumes.map(resumeScore)):0;
+  const gap=skillGap(S.settings.targetRole,S.resumes[0]);
+  const active=S.jobs.filter(j=>!["wishlist","rejected"].includes(j.stage)).length;
+  const pipe=Math.min(100,active*18);
+  const iv=S.sessions.length?Math.min(100,interviewAvg()*0.7+S.sessions.length*6):0;
+  const learn=consistency();
+  const total=Math.round(r*0.25+gap.coverage*0.2+pipe*0.2+iv*0.2+learn*0.15);
+  return {total,parts:{Resume:r,Skills:gap.coverage,Pipeline:pipe,"Interview prep":Math.round(iv),Consistency:learn}};
+}
+function salaryProjection(){
+  const band=SALARY_BANDS[S.settings.targetRole]||[95,135,175];
+  const gap=skillGap(S.settings.targetRole,S.resumes[0]);
+  const pos=gap.coverage/100;
+  const est=Math.round(band[0]+(band[2]-band[0])*pos);
+  return {est:est*1000,low:band[0]*1000,high:band[2]*1000,pos};
+}
+function upcomingInterviews(){
+  const out=[];S.jobs.forEach(j=>j.interviews.forEach(iv=>{if(new Date(iv.date)>=new Date(today()))out.push({...iv,company:j.company,role:j.role,jobId:j.id});}));
+  return out.sort((a,b)=>a.date.localeCompare(b.date));
+}
+function toggleGoal(id){const g=S.goals.find(x=>x.id===id);g.done=!g.done;markActive();save();render();}
+function toggleTask(id){const t=S.tasks.find(x=>x.id===id);t.done=!t.done;markActive();save();render();}
+function addGoal(){const v=$("#newgoal").value.trim();if(!v)return;S.goals.push({id:uid(),text:v,done:false});save();render();}
+function addTask(){const v=$("#newtask").value.trim();if(!v)return;S.tasks.push({id:uid(),text:v,done:false,date:today()});save();render();}
+function delGoal(id){S.goals=S.goals.filter(g=>g.id!==id);save();render();}
+function delTask(id){S.tasks=S.tasks.filter(g=>g.id!==id);save();render();}
+function toggleWidget(k){S.settings.widgets[k]=!S.settings.widgets[k];save();render();}
+function checklist(items,toggleFn,delFn){
+  return items.map(i=>`<div class="checkitem ${i.done?"done":""}"><input type="checkbox" ${i.done?"checked":""} onchange="${toggleFn}('${i.id}')"><label onclick="${toggleFn}('${i.id}')">${esc(i.text)}</label><button class="btn sm ghost" onclick="${delFn}('${i.id}')">✕</button></div>`).join("")||`<div class="muted small">Nothing yet.</div>`;
+}
+function viewDashboard(){
+  const W=S.settings.widgets;const rd=readiness();const sp=salaryProjection();
+  const ivs=upcomingInterviews();const pc=pipelineCounts();const gh=S.github.data;
+  const stk=streakDays();
+  const widgets=[];
+  if(W.readiness)widgets.push(`<div class="card"><h3>Career Readiness <button class="btn sm ghost no-print" onclick="nav('analytics')">details</button></h3>
+    <div class="row">${ring(rd.total,rd.total>=70?"var(--accent2)":rd.total>=45?"var(--warn)":"var(--danger)","/ 100")}
+    <div style="flex:1;min-width:140px">${Object.entries(rd.parts).map(([k,v])=>`<div class="small spread"><span class="muted">${k}</span><b>${v}</b></div><div class="progress mb" style="height:5px"><div style="width:${v}%"></div></div>`).join("")}</div></div></div>`);
+  if(W.interviews)widgets.push(`<div class="card"><h3>Upcoming Interviews</h3>${ivs.length?ivs.slice(0,4).map(iv=>{const du=daysUntil(iv.date);return `<div class="spread mb"><div><b>${esc(iv.company)}</b><div class="small muted">${esc(iv.type)} · ${fmtDate(iv.date)} ${iv.date.includes("T")?iv.date.slice(11,16):""}</div></div><span class="badge ${du<=2?"red":du<=5?"yellow":"blue"}">${du===0?"Today":du+"d"}</span></div>`;}).join("")+`<button class="btn sm" onclick="exportICS()">📅 Export to calendar (.ics)</button>`:`<div class="muted small">No interviews scheduled. Keep applying!</div>`}</div>`);
+  if(W.goals)widgets.push(`<div class="card"><h3>Weekly Goals</h3>${checklist(S.goals,"toggleGoal","delGoal")}<div class="row mt"><input id="newgoal" placeholder="Add goal…" onkeydown="if(event.key==='Enter')addGoal()"><button class="btn sm" onclick="addGoal()">Add</button></div></div>`);
+  if(W.focus)widgets.push(`<div class="card"><h3>Today's Focus</h3>${checklist(S.tasks.filter(t=>t.date===today()||!t.done),"toggleTask","delTask")}<div class="row mt"><input id="newtask" placeholder="Add task…" onkeydown="if(event.key==='Enter')addTask()"><button class="btn sm" onclick="addTask()">Add</button></div></div>`);
+  if(W.pipeline)widgets.push(`<div class="card" onclick="nav('jobs')" style="cursor:pointer"><h3>Application Pipeline</h3><div class="row">${STAGES.filter(s=>pc[s[0]]).map(([k,l])=>`<div style="text-align:center;flex:1"><div class="big">${pc[k]||0}</div><div class="small muted">${l}</div></div>`).join("")||'<div class="muted small">No applications yet.</div>'}</div></div>`);
+  if(W.certs)widgets.push(`<div class="card" onclick="nav('certs')" style="cursor:pointer"><h3>Certifications</h3>${S.certs.map(c=>`<div class="small spread"><span>${esc(c.name)}</span><b>${c.progress}%</b></div><div class="progress green mb"><div style="width:${c.progress}%"></div></div>`).join("")||'<div class="muted small">No certifications tracked.</div>'}</div>`);
+  if(W.github)widgets.push(`<div class="card" onclick="nav('github')" style="cursor:pointer"><h3>GitHub Activity</h3>${gh?`<div class="row"><div style="flex:1;text-align:center"><div class="big">${gh.publicRepos}</div><div class="small muted">repos</div></div><div style="flex:1;text-align:center"><div class="big">${gh.totalStars}</div><div class="small muted">stars</div></div><div style="flex:1;text-align:center"><div class="big">${gh.recentPushes}</div><div class="small muted">recent pushes</div></div></div><div class="small muted mt">Top: ${esc(Object.keys(gh.languages).slice(0,3).join(", ")||"—")}</div>`:`<div class="muted small">Connect GitHub in the GitHub tab.</div>`}</div>`);
+  if(W.learning)widgets.push(`<div class="card"><h3>Learning Streak</h3><div class="row"><div><div class="big">🔥 ${stk}</div><div class="small muted">day streak</div></div><div><div class="big">${consistency()}%</div><div class="small muted">28-day consistency</div></div></div><div class="streakbox mt">${(()=>{let h="";for(let i=27;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);h+=`<div class="d ${S.activity[d.toISOString().slice(0,10)]?"on":""}" title="${d.toISOString().slice(0,10)}"></div>`;}return h;})()}</div></div>`);
+  if(W.salary)widgets.push(`<div class="card"><h3>Salary Projection</h3><div class="big">${fmt$(sp.est)}</div><div class="small muted">Estimated market value as ${esc(S.settings.targetRole)} (skill coverage ${Math.round(sp.pos*100)}%)</div><div class="progress mt"><div style="width:${sp.pos*100}%"></div></div><div class="small muted spread mt"><span>${fmt$(sp.low)}</span><span>${fmt$(sp.high)}</span></div></div>`);
+  return `<div class="spread mb"><div><b style="font-size:18px">Welcome back, ${esc(S.settings.name)} 👋</b><div class="muted small">Target: ${esc(S.settings.targetRole)} · ${new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})}</div></div>
+  <div class="row no-print"><button class="btn sm" onclick="openWidgetConfig()">⚙️ Widgets</button><button class="btn sm primary" onclick="nav('coach')">🤖 Ask Coach</button></div></div>
+  <div class="grid g2">${widgets.join("")}</div>`;
+}
+function openWidgetConfig(){
+  const names={readiness:"Readiness score",goals:"Weekly goals",focus:"Daily focus",interviews:"Interviews",pipeline:"Pipeline",certs:"Certifications",github:"GitHub",learning:"Learning streak",salary:"Salary projection"};
+  openModal(`<h2>Configure dashboard widgets</h2><p class="muted small mb">Match your focus: learning, job hunt, or promotion.</p>${Object.entries(names).map(([k,l])=>`<div class="checkitem"><input type="checkbox" ${S.settings.widgets[k]?"checked":""} onchange="toggleWidget('${k}')"><label>${l}</label></div>`).join("")}<div class="row mt"><button class="btn primary" onclick="closeModal()">Done</button></div>`);
+}
+function exportICS(){
+  const ivs=upcomingInterviews();if(!ivs.length)return toast("No upcoming interviews");
+  let ics="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//CareerOS//EN\r\n";
+  ivs.forEach(iv=>{const dt=iv.date.replace(/[-:]/g,"").slice(0,13)+"00";ics+=`BEGIN:VEVENT\r\nUID:${iv.id}@careeros\r\nDTSTART:${dt}\r\nSUMMARY:${iv.company} — ${iv.type}\r\nDESCRIPTION:${iv.role}\r\nEND:VEVENT\r\n`;});
+  ics+="END:VCALENDAR";download("careeros-interviews.ics",ics,"text/calendar");toast("Calendar file downloaded");
+}
+/* ============ RESUME MANAGER ============ */
+const STRONG_VERBS={"responsible for":"Owned","worked on":"Delivered","helped":"Drove","helped build":"Built","was involved in":"Led","assisted":"Supported","participated in":"Contributed to","made":"Created","did":"Executed","used":"Leveraged","worked with":"Collaborated with"};
+function optimizeBullet(b){
+  let out=b.trim();let notes=[];
+  for(const[weak,strong]of Object.entries(STRONG_VERBS)){const re=new RegExp("^"+weak,"i");if(re.test(out)){out=out.replace(re,strong);notes.push(`Replaced weak opener "${weak}" → "${strong}"`);break;}}
+  if(!/\d/.test(out)){notes.push("Add a metric (%, $, time saved, scale) to show impact");out=out.replace(/\.?$/,"")+" — [quantify impact: e.g., % improvement, users served, time saved]";}
+  if(out.length>0)out=out[0].toUpperCase()+out.slice(1);
+  if(!notes.length)notes.push("Strong bullet — action verb + measurable result ✓");
+  return{text:out,notes};
+}
+function curResume(){return S.resumes.find(r=>r.id===window._navArg)||S.resumes[0];}
+function snapshotResume(r){r.history.unshift({ts:now(),snapshot:JSON.stringify(r.sections)});if(r.history.length>20)r.history.pop();}
+function viewResume(){
+  const r=curResume();
+  if(!r)return `<div class="empty">No resumes yet.<br><br><button class="btn primary" onclick="newResume()">＋ Create resume</button></div>`;
+  const score=resumeScore(r);const gap=skillGap(r.target||S.settings.targetRole,r);
+  return `<div class="spread mb"><div class="row">
+    <select onchange="nav('resume',this.value)" style="width:auto">${S.resumes.map(x=>`<option value="${x.id}" ${x.id===r.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
+    <button class="btn sm" onclick="newResume()">＋ New version</button>
+    <button class="btn sm" onclick="dupResume('${r.id}')">⧉ Duplicate</button>
+    <button class="btn sm danger" onclick="if(confirm('Delete this resume version?')){S.resumes=S.resumes.filter(x=>x.id!=='${r.id}');save();nav('resume');}">Delete</button></div>
+    <div class="row"><button class="btn sm" onclick="exportResumePDF('${r.id}')">⬇ PDF</button><button class="btn sm" onclick="exportResumeDocx('${r.id}')">⬇ DOCX</button><button class="btn sm success" onclick="genPortfolio('${r.id}')">🌐 Portfolio page</button></div></div>
+  <div class="grid" style="grid-template-columns:1fr 320px">
+    <div>
+      <div class="card mb"><h3>Editor — ${esc(r.name)} <button class="btn sm" onclick="renameResume('${r.id}')">rename</button></h3>
+        <label>Target role</label><select onchange="const r=curResume();r.target=this.value;snapAndSave(r)">${Object.keys(ROLE_SKILLS).map(k=>`<option ${((r.target||S.settings.targetRole)===k)?"selected":""}>${k}</option>`).join("")}</select>
+        <label>Professional summary</label><textarea onchange="const r=curResume();r.sections.summary=this.value;snapAndSave(r)">${esc(r.sections.summary)}</textarea>
+        <label>Skills (comma-separated)</label><textarea onchange="const r=curResume();r.sections.skills=this.value;snapAndSave(r)">${esc(r.sections.skills)}</textarea>
+        <label>Experience</label>
+        ${r.sections.experience.map((e,i)=>`<div class="card mb" style="background:var(--bg)">
+          <div class="row"><input value="${esc(e.company)}" placeholder="Company" onchange="curResume().sections.experience[${i}].company=this.value;snapAndSave(curResume())" style="flex:2"><input value="${esc(e.role)}" placeholder="Role" onchange="curResume().sections.experience[${i}].role=this.value;snapAndSave(curResume())" style="flex:2"><input value="${esc(e.dates)}" placeholder="Dates" onchange="curResume().sections.experience[${i}].dates=this.value;snapAndSave(curResume())" style="flex:1"></div>
+          <label>Bullets (one per line)</label><textarea onchange="curResume().sections.experience[${i}].bullets=this.value.split('\\n').filter(Boolean);snapAndSave(curResume())">${esc(e.bullets.join("\n"))}</textarea>
+          <button class="btn sm danger mt" onclick="curResume().sections.experience.splice(${i},1);snapAndSave(curResume());render()">Remove role</button></div>`).join("")}
+        <button class="btn sm" onclick="curResume().sections.experience.push({company:'',role:'',dates:'',bullets:[]});save();render()">＋ Add role</button>
+        <label>Education</label><textarea onchange="const r=curResume();r.sections.education=this.value;snapAndSave(r)">${esc(r.sections.education)}</textarea>
+        <label>Projects</label><textarea onchange="const r=curResume();r.sections.projects=this.value;snapAndSave(r)">${esc(r.sections.projects)}</textarea>
+      </div>
+      <div class="card mb"><h3>🤖 AI Tools</h3>
+        <div class="row"><button class="btn primary sm" onclick="aiOptimizeResume('${r.id}')">✨ Optimize bullet points</button>
+        <button class="btn sm" onclick="openTailor('${r.id}')">🎯 Tailor to job description</button>
+        <button class="btn sm" onclick="atsCheck('${r.id}')">🧾 ATS compatibility check</button></div>
+        <div id="aiout"></div>
+      </div>
+      <div class="card"><h3>Version history (${r.history.length})</h3>
+        ${r.history.slice(0,8).map((h,i)=>`<div class="spread small mb"><span class="muted">${new Date(h.ts).toLocaleString()}</span><span><button class="btn sm" onclick="showDiff('${r.id}',${i})">diff</button> <button class="btn sm" onclick="if(confirm('Restore this version?')){const r=curResume();snapshotResume(r);r.sections=JSON.parse(r.history[${i}+1]?r.history[${i}].snapshot:r.history[${i}].snapshot);save();render();}">restore</button></span></div>`).join("")||'<div class="muted small">Edits create history snapshots automatically.</div>'}
+      </div>
+    </div>
+    <div>
+      <div class="card mb"><h3>Resume Score</h3><div class="row">${ring(score,score>=70?"var(--accent2)":"var(--warn)","/ 100")}<div class="small muted" style="flex:1">Based on clarity, quantified impact, skills breadth, and completeness.</div></div></div>
+      <div class="card mb"><h3>Skill Gap — ${esc(r.target||S.settings.targetRole)}</h3>
+        <div class="small mb">Coverage: <b>${gap.coverage}%</b></div><div class="progress mb"><div style="width:${gap.coverage}%"></div></div>
+        <div class="small muted">Missing:</div><div class="pill-row">${gap.missing.map(m=>`<span class="badge red">${esc(m)}</span>`).join("")||'<span class="badge green">None — full coverage!</span>'}</div>
+        <div class="small muted mt">Covered:</div><div class="pill-row">${gap.have.map(m=>`<span class="badge green">${esc(m)}</span>`).join("")}</div>
+      </div>
+      <div class="card"><h3>Keyword suggestions</h3><div class="small muted mb">Consider adding (from ${esc(r.target||S.settings.targetRole)} postings):</div><div class="pill-row">${gap.missing.slice(0,6).map(m=>`<span class="badge blue" style="cursor:pointer" onclick="const r=curResume();r.sections.skills+=', ${esc(m).replace(/'/g,"")}';snapAndSave(r);render();toast('Added to skills')">${esc(m)} ＋</span>`).join("")||'<span class="muted small">Looking good.</span>'}</div></div>
+    </div>
+  </div>`;
+}
+function snapAndSave(r){snapshotResume(r);r.updated=now();markActive();save();}
+function newResume(){const name=prompt("Resume version name:","New Resume");if(!name)return;S.resumes.push({id:uid(),name,target:S.settings.targetRole,updated:now(),history:[],sections:{summary:"",skills:"",experience:[],education:"",projects:""}});save();nav("resume",S.resumes[S.resumes.length-1].id);}
+function dupResume(id){const r=S.resumes.find(x=>x.id===id);const c=JSON.parse(JSON.stringify(r));c.id=uid();c.name=r.name+" (copy)";c.history=[];S.resumes.push(c);save();nav("resume",c.id);toast("Duplicated");}
+function renameResume(id){const r=S.resumes.find(x=>x.id===id);const n=prompt("New name:",r.name);if(n){r.name=n;save();render();}}
+function aiOptimizeResume(id){
+  const r=S.resumes.find(x=>x.id===id);snapshotResume(r);
+  let report=`<div class="card mt" style="background:var(--bg)"><b>✨ Optimization report</b>`;
+  r.sections.experience.forEach(e=>{e.bullets=e.bullets.map(b=>{const o=optimizeBullet(b);if(o.text!==b)report+=`<div class="mt small"><div class="diffline del">− ${esc(b)}</div><div class="diffline add">+ ${esc(o.text)}</div><div class="muted">${o.notes.map(esc).join(" · ")}</div></div>`;return o.text;});});
+  report+=`<div class="small muted mt">Bullets rewritten with strong action verbs; placeholders added where metrics are missing — replace them with real numbers.</div></div>`;
+  save();render();$("#aiout").innerHTML=report;toast("Resume optimized");
+}
+function openTailor(id){
+  openModal(`<h2>🎯 Tailor resume to a job</h2><label>Paste the job description</label><textarea id="tailorjd" rows="8" placeholder="Paste JD here…"></textarea>
+  <label>Or pick from your tracker</label><select id="tailorjob"><option value="">—</option>${S.jobs.filter(j=>j.jd).map(j=>`<option value="${j.id}">${esc(j.company)} — ${esc(j.role)}</option>`).join("")}</select>
+  <div class="row mt"><button class="btn primary" onclick="runTailor('${id}')">Analyze & tailor</button><button class="btn" onclick="closeModal()">Cancel</button></div><div id="tailorout"></div>`);
+}
+function runTailor(id){
+  const r=S.resumes.find(x=>x.id===id);
+  let jd=$("#tailorjd").value.trim();const jobId=$("#tailorjob").value;
+  if(!jd&&jobId)jd=S.jobs.find(j=>j.id===jobId).jd;
+  if(!jd)return toast("Paste a job description first");
+  const stop=new Set("the a an and or of to in for with on at by is are be will you our we as that this from your their have has must plus etc who they able".split(" "));
+  const words=jd.toLowerCase().match(/[a-z][a-z+#.\-]{2,}/g)||[];
+  const freq={};words.forEach(w=>{if(!stop.has(w))freq[w]=(freq[w]||0)+1;});
+  const top=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,18).map(x=>x[0]);
+  const rtext=JSON.stringify(r.sections).toLowerCase();
+  const matched=top.filter(k=>rtext.includes(k)),missing=top.filter(k=>!rtext.includes(k));
+  const matchPct=Math.round(100*matched.length/top.length);
+  $("#tailorout").innerHTML=`<div class="card mt" style="background:var(--bg)">
+    <div class="spread"><b>Match score</b><span class="badge ${matchPct>=70?"green":matchPct>=40?"yellow":"red"}">${matchPct}%</span></div>
+    <div class="progress mt mb"><div style="width:${matchPct}%"></div></div>
+    <div class="small"><b>✓ Matched keywords:</b> <span class="muted">${matched.map(esc).join(", ")||"none"}</span></div>
+    <div class="small mt"><b>✗ Missing keywords:</b> <span class="muted">${missing.map(esc).join(", ")||"none"}</span></div>
+    <div class="small mt"><b>Recommendations:</b><br>· Weave the missing keywords into your summary/skills where truthful.<br>· Mirror the JD's exact phrasing (ATS matches literal strings).<br>· Lead bullets with the JD's top requirements: ${top.slice(0,3).map(esc).join(", ")}.</div>
+    <button class="btn sm primary mt" onclick="applyTailor('${id}',${JSON.stringify(missing.slice(0,8)).replace(/"/g,"&quot;")})">Add missing keywords to skills</button></div>`;
+}
+function applyTailor(id,kws){const r=S.resumes.find(x=>x.id===id);snapshotResume(r);r.sections.skills+=(r.sections.skills?", ":"")+kws.join(", ");save();closeModal();render();toast("Keywords added — review & keep only what's truthful");}
+function atsCheck(id){
+  const r=S.resumes.find(x=>x.id===id);const sec=r.sections;const checks=[];
+  const add=(ok,label,fix)=>checks.push({ok,label,fix});
+  add(!!sec.summary,"Professional summary present","Add a 2–3 sentence summary");
+  add(resumeSkillsList(r).length>=8,"8+ skills listed","List more relevant hard skills");
+  add(sec.experience.length>0,"Work experience present","Add at least one role");
+  add(sec.experience.every(e=>e.dates),"All roles have dates","ATS parsers need date ranges");
+  const bullets=sec.experience.flatMap(e=>e.bullets);
+  add(bullets.filter(b=>/\d/.test(b)).length>=bullets.length/2,"Majority of bullets quantified","Add metrics to more bullets");
+  add(!bullets.some(b=>b.length>220),"No overlong bullets (>220 chars)","Split long bullets");
+  add(!!sec.education,"Education section present","Add education");
+  add(!/[│┃▪◦→]/.test(JSON.stringify(sec)),"No exotic symbols","Replace special glyphs — they break parsers");
+  const passed=checks.filter(c=>c.ok).length;
+  $("#aiout").innerHTML=`<div class="card mt" style="background:var(--bg)"><div class="spread"><b>🧾 ATS Compatibility</b><span class="badge ${passed>=7?"green":passed>=5?"yellow":"red"}">${passed}/${checks.length} passed</span></div>
+  ${checks.map(c=>`<div class="small mt">${c.ok?"✅":"❌"} ${c.label}${c.ok?"":` — <span class="muted">${c.fix}</span>`}</div>`).join("")}
+  <div class="small muted mt">Also: use standard section headings, single-column layout, no tables/images in the real exported file.</div></div>`;
+}
+function showDiff(id,i){
+  const r=S.resumes.find(x=>x.id===id);
+  const old=JSON.parse(r.history[i].snapshot);
+  const flat=s=>[s.summary,"SKILLS: "+s.skills,...s.experience.flatMap(e=>[e.company+" — "+e.role,...e.bullets]),s.education,s.projects].filter(Boolean);
+  const a=flat(old),b=flat(r.sections);
+  const del=a.filter(x=>!b.includes(x)),addl=b.filter(x=>!a.includes(x));
+  openModal(`<h2>Diff vs ${new Date(r.history[i].ts).toLocaleString()}</h2><div style="max-height:400px;overflow-y:auto">${del.map(l=>`<div class="diffline del">− ${esc(l)}</div>`).join("")}${addl.map(l=>`<div class="diffline add">+ ${esc(l)}</div>`).join("")||'<div class="muted small">No changes.</div>'}</div><button class="btn mt" onclick="closeModal()">Close</button>`);
+}
+function resumeHTML(r){
+  const s=r.sections;
+  return `<div style="font-family:Georgia,serif;max-width:700px;margin:0 auto;color:#111">
+  <h1 style="margin-bottom:2px">${esc(S.settings.name)}</h1><div style="color:#555;margin-bottom:14px">${esc(r.target||"")} · masonjtr@gmail.com</div>
+  <h2 style="border-bottom:1px solid #999;font-size:15px">SUMMARY</h2><p>${esc(s.summary)}</p>
+  <h2 style="border-bottom:1px solid #999;font-size:15px">SKILLS</h2><p>${esc(s.skills)}</p>
+  <h2 style="border-bottom:1px solid #999;font-size:15px">EXPERIENCE</h2>
+  ${s.experience.map(e=>`<div style="margin-bottom:10px"><b>${esc(e.role)}</b> — ${esc(e.company)} <span style="float:right;color:#555">${esc(e.dates)}</span><ul>${e.bullets.map(b=>`<li>${esc(b)}</li>`).join("")}</ul></div>`).join("")}
+  <h2 style="border-bottom:1px solid #999;font-size:15px">EDUCATION</h2><p>${esc(s.education)}</p>
+  ${s.projects?`<h2 style="border-bottom:1px solid #999;font-size:15px">PROJECTS</h2><p>${esc(s.projects)}</p>`:""}</div>`;
+}
+function exportResumePDF(id){const r=S.resumes.find(x=>x.id===id);const w=window.open("","_blank");w.document.write(`<html><head><title>${esc(r.name)}</title></head><body>${resumeHTML(r)}<script>window.print()<\/script></body></html>`);w.document.close();}
+function exportResumeDocx(id){const r=S.resumes.find(x=>x.id===id);const html=`<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>${resumeHTML(r)}</body></html>`;download(r.name.replace(/\s+/g,"_")+".doc",html,"application/msword");toast("DOCX downloaded (opens in Word)");}
+function genPortfolio(id){
+  const r=S.resumes.find(x=>x.id===id);const s=r.sections;const gh=S.github.data;
+  const repos=(gh?gh.repos.filter(x=>S.github.showcase.includes(x.name)):[]);
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(S.settings.name)} — Portfolio</title><style>body{font-family:-apple-system,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#1f2328;line-height:1.6}h1{margin-bottom:0}.sub{color:#656d76}.chip{display:inline-block;background:#eaeef2;border-radius:14px;padding:3px 12px;margin:3px;font-size:13px}.proj{border:1px solid #d0d7de;border-radius:10px;padding:16px;margin:12px 0}a{color:#0969da}</style></head><body>
+  <h1>${esc(S.settings.name)}</h1><div class="sub">${esc(r.target||S.settings.targetRole)}</div>
+  <p>${esc(s.summary)}</p><h2>Skills</h2><div>${resumeSkillsList(r).map(k=>`<span class="chip">${esc(k)}</span>`).join("")}</div>
+  <h2>Experience</h2>${s.experience.map(e=>`<div class="proj"><b>${esc(e.role)}</b> — ${esc(e.company)} <span class="sub">(${esc(e.dates)})</span><ul>${e.bullets.slice(0,3).map(b=>`<li>${esc(b)}</li>`).join("")}</ul></div>`).join("")}
+  ${repos.length?`<h2>Featured Projects</h2>${repos.map(p=>`<div class="proj"><b><a href="${esc(p.url)}">${esc(p.name)}</a></b> ⭐ ${p.stars}<p>${esc(p.description||"")}</p><span class="chip">${esc(p.language||"")}</span></div>`).join("")}`:s.projects?`<h2>Projects</h2><p>${esc(s.projects)}</p>`:""}
+  <h2>Education</h2><p>${esc(s.education)}</p><hr><p class="sub">Generated with CareerOS</p></body></html>`;
+  download("portfolio.html",html,"text/html");toast("Portfolio page downloaded — open it or host it anywhere");
+}
+/* ============ JOB TRACKER ============ */
+const STAGES=[["wishlist","Wishlist"],["applied","Applied"],["oa","Online Assessment"],["phone_screen","Phone Screen"],["onsite","Onsite"],["offer","Offer"],["rejected","Rejected"]];
+function stageLabel(k){return (STAGES.find(s=>s[0]===k)||["","?"])[1];}
+let jobsMode="kanban";
+function viewJobs(){
+  if(window._navArg){const j=S.jobs.find(x=>x.id===window._navArg);window._navArg=null;if(j)setTimeout(()=>openJob(j.id),50);}
+  const dues=S.jobs.filter(j=>j.followUp&&daysUntil(j.followUp)<=0&&!["rejected","offer"].includes(j.stage));
+  const offers=S.jobs.filter(j=>j.offer);
+  return `<div class="spread mb"><div class="row">
+    <button class="btn sm ${jobsMode==="kanban"?"primary":""}" onclick="jobsMode='kanban';render()">Kanban</button>
+    <button class="btn sm ${jobsMode==="table"?"primary":""}" onclick="jobsMode='table';render()">Table</button>
+    ${offers.length>1?`<button class="btn sm" onclick="compareOffers()">⚖️ Compare offers (${offers.length})</button>`:""}
+    <button class="btn sm" onclick="rejectionAnalytics()">📉 Rejection analytics</button>
+    <button class="btn sm" onclick="exportJobsCSV()">⬇ CSV</button></div>
+    <button class="btn primary sm" onclick="openJob()">＋ Add job</button></div>
+  ${dues.length?`<div class="card mb" style="border-color:var(--warn)"><h3>⏰ Follow-ups due</h3>${dues.map(j=>`<div class="spread small mb"><span><b>${esc(j.company)}</b> — ${esc(j.role)} (due ${fmtDate(j.followUp)})</span><span><button class="btn sm" onclick="draftFollowUp('${j.id}')">✉️ Draft email</button> <button class="btn sm" onclick="const j=S.jobs.find(x=>x.id==='${j.id}');j.followUp='';save();render()">Done</button></span></div>`).join("")}</div>`:""}
+  ${jobsMode==="kanban"?kanbanView():jobsTable()}`;
+}
+function kanbanView(){
+  return `<div class="kanban">${STAGES.map(([k,l])=>{const js=S.jobs.filter(j=>j.stage===k);
+    return `<div class="kcol"><h4>${l}<span>${js.length}</span></h4>${js.map(j=>`<div class="kcard" onclick="openJob('${j.id}')"><div class="co">${esc(j.company)}</div><div class="ro">${esc(j.role)}</div>${j.salaryMin?`<div class="small muted">${fmt$(j.salaryMin)}–${fmt$(j.salaryMax)}</div>`:""}${j.interviews.filter(iv=>daysUntil(iv.date)>=0).length?`<span class="badge blue">📅 interview in ${daysUntil(j.interviews.filter(iv=>daysUntil(iv.date)>=0)[0].date)}d</span>`:""}
+    <div class="row mt no-print">${k!=="wishlist"?`<button class="btn sm ghost" onclick="event.stopPropagation();moveStage('${j.id}',-1)">←</button>`:""}${k!=="rejected"?`<button class="btn sm ghost" onclick="event.stopPropagation();moveStage('${j.id}',1)">→</button>`:""}</div></div>`).join("")}</div>`;}).join("")}</div>`;
+}
+function jobsTable(){
+  return `<div class="card"><table><tr><th>Company</th><th>Role</th><th>Stage</th><th>Salary</th><th>Recruiter</th><th>Applied</th><th>Follow-up</th></tr>
+  ${S.jobs.map(j=>`<tr style="cursor:pointer" onclick="openJob('${j.id}')"><td><b>${esc(j.company)}</b></td><td>${esc(j.role)}</td><td><span class="badge ${j.stage==="offer"?"green":j.stage==="rejected"?"red":"blue"}">${stageLabel(j.stage)}</span></td><td>${j.salaryMin?fmt$(j.salaryMin)+"–"+fmt$(j.salaryMax):"—"}</td><td>${esc(j.recruiter.name||"—")}</td><td>${fmtDate(j.created)}</td><td>${fmtDate(j.followUp)}</td></tr>`).join("")}</table></div>`;
+}
+function moveStage(id,dir){
+  const j=S.jobs.find(x=>x.id===id);const i=STAGES.findIndex(s=>s[0]===j.stage);
+  const ni=Math.max(0,Math.min(STAGES.length-1,i+dir));j.stage=STAGES[ni][0];
+  (j.statusLog=j.statusLog||[]).push({stage:j.stage,date:today()});
+  if(j.stage==="rejected"&&!j.rejection){setTimeout(()=>promptRejection(id),100);}
+  if(j.stage==="offer"&&!j.offer){toast("🎉 Offer! Open the job to enter offer details.");}
+  markActive();save();render();
+}
+function promptRejection(id){
+  openModal(`<h2>Log rejection reason</h2><p class="muted small">Tracking reasons reveals patterns to fix.</p>
+  <label>Reason given (or your best guess)</label><textarea id="rejreason"></textarea>
+  <label>Tags</label><div class="pill-row">${["resume screen","coding round","system design","behavioral","experience level","culture fit","position filled","no feedback"].map(t=>`<span class="badge" style="cursor:pointer" onclick="this.classList.toggle('red')">${t}</span>`).join("")}</div>
+  <div class="row mt"><button class="btn primary" onclick="saveRejection('${id}')">Save</button><button class="btn" onclick="closeModal()">Skip</button></div>`);
+}
+function saveRejection(id){
+  const j=S.jobs.find(x=>x.id===id);
+  const tags=[...document.querySelectorAll("#modal .badge.red")].map(b=>b.textContent);
+  j.rejection={reason:$("#rejreason").value,tags};
+  if(S.automations.find(a=>a.trigger==="rejection"&&a.on)&&tags.length)S.tasks.push({id:uid(),text:"Study focus: strengthen "+tags[0]+" (from "+j.company+" feedback)",done:false,date:today()});
+  save();closeModal();render();toast("Logged");
+}
+function openJob(id){
+  const j=id?S.jobs.find(x=>x.id===id):{id:"",company:"",role:"",link:"",jd:"",stage:"wishlist",salaryMin:"",salaryMax:"",compNotes:"",recruiter:{name:"",email:"",phone:""},interviews:[],followUp:"",offer:null,rejection:null,notes:"",created:today(),statusLog:[]};
+  window._editJob=JSON.parse(JSON.stringify(j));window._editJob._isNew=!id;
+  openModal(`<h2>${id?esc(j.company)+" — "+esc(j.role):"Add job"}</h2>
+  <div class="row"><div style="flex:1"><label>Company</label><input id="jf_company" value="${esc(j.company)}"></div><div style="flex:1"><label>Role</label><input id="jf_role" value="${esc(j.role)}"></div></div>
+  <div class="row"><div style="flex:1"><label>Stage</label><select id="jf_stage">${STAGES.map(([k,l])=>`<option value="${k}" ${j.stage===k?"selected":""}>${l}</option>`).join("")}</select></div>
+  <div style="flex:1"><label>Link</label><input id="jf_link" value="${esc(j.link)}"></div></div>
+  <label>Job description (for AI tailoring & keyword match)</label><textarea id="jf_jd" rows="3">${esc(j.jd)}</textarea>
+  <div class="row"><div style="flex:1"><label>Salary min</label><input id="jf_smin" type="number" value="${j.salaryMin||""}"></div><div style="flex:1"><label>Salary max</label><input id="jf_smax" type="number" value="${j.salaryMax||""}"></div><div style="flex:1"><label>Follow-up date</label><input id="jf_fu" type="date" value="${j.followUp||""}"></div></div>
+  <label>Comp notes</label><input id="jf_comp" value="${esc(j.compNotes)}">
+  <div class="row"><div style="flex:1"><label>Recruiter name</label><input id="jf_rn" value="${esc(j.recruiter.name)}"></div><div style="flex:1"><label>Recruiter email</label><input id="jf_re" value="${esc(j.recruiter.email)}"></div><div style="flex:1"><label>Phone</label><input id="jf_rp" value="${esc(j.recruiter.phone)}"></div></div>
+  <label>Interviews</label><div id="jf_ivs">${j.interviews.map((iv,i)=>`<div class="row mb"><input value="${esc(iv.type)}" data-ivt="${i}" placeholder="Type" style="flex:2"><input type="datetime-local" value="${iv.date}" data-ivd="${i}" style="flex:2"><button class="btn sm danger" onclick="window._editJob.interviews.splice(${i},1);openJob('${id}')">✕</button></div>`).join("")}</div>
+  <button class="btn sm" onclick="syncIvEdits();window._editJob.interviews.push({id:uid(),type:'',date:''});reopenEditJob()">＋ Add interview</button>
+  <label>Notes</label><textarea id="jf_notes" rows="2">${esc(j.notes)}</textarea>
+  ${j.stage==="offer"||j.offer?offerFields(j.offer):""}
+  ${j.rejection?`<label>Rejection</label><div class="small muted">${esc(j.rejection.reason)} ${j.rejection.tags.map(t=>`<span class="badge red">${esc(t)}</span>`).join(" ")}</div>`:""}
+  <div class="row mt"><button class="btn primary" onclick="saveJob('${id||""}')">Save</button>${id?`<button class="btn danger" onclick="if(confirm('Delete job?')){S.jobs=S.jobs.filter(x=>x.id!=='${id}');save();closeModal();render();}">Delete</button>`:""}<button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function offerFields(o){o=o||{base:"",bonus:"",equity:"",benefits:"",location:"",remote:""};
+  return `<div class="card mt" style="background:var(--bg)"><b>💰 Offer details</b>
+  <div class="row"><div style="flex:1"><label>Base</label><input id="of_base" type="number" value="${o.base||""}"></div><div style="flex:1"><label>Bonus</label><input id="of_bonus" type="number" value="${o.bonus||""}"></div></div>
+  <div class="row"><div style="flex:1"><label>Equity</label><input id="of_eq" value="${esc(o.equity||"")}"></div><div style="flex:1"><label>Remote/Hybrid</label><input id="of_rem" value="${esc(o.remote||"")}"></div></div>
+  <label>Benefits</label><input id="of_ben" value="${esc(o.benefits||"")}"><label>Location</label><input id="of_loc" value="${esc(o.location||"")}"></div>`;
+}
+function syncIvEdits(){document.querySelectorAll("[data-ivt]").forEach(el=>window._editJob.interviews[+el.dataset.ivt].type=el.value);document.querySelectorAll("[data-ivd]").forEach(el=>window._editJob.interviews[+el.dataset.ivd].date=el.value);}
+function reopenEditJob(){const j=window._editJob;const tmp=window._editJob;openJobFromTmp(tmp);}
+function openJobFromTmp(tmp){const id=tmp._isNew?"":tmp.id;const real=id?S.jobs.find(x=>x.id===id):null;const backup=real?JSON.parse(JSON.stringify(real)):null;if(real)Object.assign(real,tmp);openJob(id||undefined);if(real&&backup)Object.assign(real,backup);if(!id){/* new job: re-render modal manually */}}
+function saveJob(id){
+  syncIvEdits();
+  const g=x=>$(x)?$(x).value:"";
+  const data={company:g("#jf_company"),role:g("#jf_role"),stage:g("#jf_stage"),link:g("#jf_link"),jd:g("#jf_jd"),salaryMin:+g("#jf_smin")||0,salaryMax:+g("#jf_smax")||0,compNotes:g("#jf_comp"),followUp:g("#jf_fu"),notes:g("#jf_notes"),recruiter:{name:g("#jf_rn"),email:g("#jf_re"),phone:g("#jf_rp")},interviews:window._editJob.interviews.filter(iv=>iv.type||iv.date)};
+  if($("#of_base"))data.offer={base:+g("#of_base")||0,bonus:+g("#of_bonus")||0,equity:g("#of_eq"),benefits:g("#of_ben"),location:g("#of_loc"),remote:g("#of_rem")};
+  if(!data.company)return toast("Company is required");
+  if(id){const j=S.jobs.find(x=>x.id===id);const oldStage=j.stage;Object.assign(j,data);if(oldStage!==j.stage)(j.statusLog=j.statusLog||[]).push({stage:j.stage,date:today()});if(j.stage==="rejected"&&!j.rejection){closeModal();promptRejection(id);save();render();return;}}
+  else S.jobs.push(Object.assign({id:uid(),created:today(),offer:null,rejection:null,statusLog:[{stage:data.stage,date:today()}]},data));
+  markActive();save();closeModal();render();toast("Saved");
+}
+function compareOffers(){
+  const offers=S.jobs.filter(j=>j.offer);
+  const tc=o=>(o.base||0)+(o.bonus||0);
+  openModal(`<h2>⚖️ Offer comparison</h2><div style="overflow-x:auto"><table><tr><th></th>${offers.map(j=>`<th>${esc(j.company)}</th>`).join("")}</tr>
+  ${[["Base",j=>fmt$(j.offer.base)],["Bonus",j=>fmt$(j.offer.bonus)],["Cash total",j=>"<b>"+fmt$(tc(j.offer))+"</b>"],["Equity",j=>esc(j.offer.equity||"—")],["Benefits",j=>esc(j.offer.benefits||"—")],["Location",j=>esc(j.offer.location||"—")],["Remote",j=>esc(j.offer.remote||"—")]].map(([l,f])=>`<tr><td class="muted">${l}</td>${offers.map(j=>`<td>${f(j)}</td>`).join("")}</tr>`).join("")}</table></div>
+  <div class="small muted mt">💡 Highest cash: <b>${esc(offers.slice().sort((a,b)=>tc(b.offer)-tc(a.offer))[0].company)}</b>. Also weigh growth, mentorship, tech stack, and commute.</div>
+  <button class="btn mt" onclick="closeModal()">Close</button>`);
+}
+function rejectionAnalytics(){
+  const rej=S.jobs.filter(j=>j.rejection);
+  const tagCount={};rej.forEach(j=>j.rejection.tags.forEach(t=>tagCount[t]=(tagCount[t]||0)+1));
+  const sorted=Object.entries(tagCount).sort((a,b)=>b[1]-a[1]);
+  const applied=S.jobs.filter(j=>j.stage!=="wishlist").length;
+  openModal(`<h2>📉 Rejection analytics</h2>
+  <div class="row mb"><div style="flex:1;text-align:center"><div class="big">${rej.length}</div><div class="small muted">rejections</div></div><div style="flex:1;text-align:center"><div class="big">${applied?Math.round(100*rej.length/applied):0}%</div><div class="small muted">of applications</div></div></div>
+  ${sorted.length?`<b class="small">Patterns detected:</b>${sorted.map(([t,c])=>`<div class="spread small mt"><span>${esc(t)}</span><b>${c}×</b></div><div class="progress"><div style="width:${100*c/rej.length}%;background:var(--danger)"></div></div>`).join("")}
+  <div class="card mt" style="background:var(--bg)"><b class="small">🤖 Coach insight:</b><div class="small muted">Your most common rejection driver is <b>${esc(sorted[0][0])}</b>. Recommended: schedule 2 focused ${esc(sorted[0][0])} practice sessions this week in the Interview Center${sorted[0][0]==="system design"?", and work through the System Design Primer modules in your Learning list":""}.</div></div>`:`<div class="muted small">No rejection reasons logged yet. When a job moves to Rejected you'll be prompted to log the reason.</div>`}
+  <button class="btn mt" onclick="closeModal()">Close</button>`);
+}
+function draftFollowUp(id){
+  const j=S.jobs.find(x=>x.id===id);
+  const name=j.recruiter.name?j.recruiter.name.split(" ")[0]:"there";
+  const body=`Hi ${name},\n\nI hope your week is going well! I wanted to follow up on my application for the ${j.role} position${j.stage==="applied"?"":" and thank you again for the recent conversation"}. I remain very excited about the opportunity to contribute to ${j.company}.\n\nPlease let me know if there's any additional information I can provide.\n\nBest regards,\n${S.settings.name}`;
+  openModal(`<h2>✉️ Follow-up draft — ${esc(j.company)}</h2><textarea rows="10" id="fudraft">${esc(body)}</textarea>
+  <div class="row mt"><button class="btn primary" onclick="navigator.clipboard.writeText($('#fudraft').value).then(()=>toast('Copied'))">Copy</button>
+  ${j.recruiter.email?`<a class="btn" href="mailto:${esc(j.recruiter.email)}?subject=${encodeURIComponent("Following up — "+j.role)}&body=${encodeURIComponent(body)}">Open in email</a>`:""}
+  <button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+function exportJobsCSV(){
+  const rows=[["Company","Role","Stage","SalaryMin","SalaryMax","Recruiter","RecruiterEmail","Applied","FollowUp","Notes"]];
+  S.jobs.forEach(j=>rows.push([j.company,j.role,stageLabel(j.stage),j.salaryMin,j.salaryMax,j.recruiter.name,j.recruiter.email,j.created,j.followUp,(j.notes||"").replace(/\n/g," ")]));
+  download("careeros-jobs.csv",rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n"),"text/csv");toast("CSV downloaded");
+}
+/* ============ NETWORKING CRM ============ */
+function relScore(c){
+  if(!c.interactions.length)return 0;
+  const rec=Math.min(...c.interactions.map(i=>Math.abs(daysUntil(i.date))));
+  const recencyPts=rec<=7?50:rec<=21?38:rec<=45?25:rec<=90?12:4;
+  const depthPts=Math.min(50,c.interactions.length*10+(c.interactions.some(i=>["Coffee chat","Call","Meeting"].includes(i.kind))?15:0));
+  return Math.min(100,recencyPts+depthPts);
+}
+function outreachSuggestions(){
+  return S.contacts.map(c=>({c,score:relScore(c)})).filter(x=>x.score<40||(x.c.followUp&&daysUntil(x.c.followUp)<=0)).sort((a,b)=>a.score-b.score).slice(0,3);
+}
+function viewNetwork(){
+  if(window._navArg){const c=S.contacts.find(x=>x.id===window._navArg);window._navArg=null;if(c)setTimeout(()=>openContact(c.id),50);}
+  const sugg=outreachSuggestions();
+  return `<div class="spread mb"><div class="row"><button class="btn sm" onclick="exportContactsCSV()">⬇ CSV</button></div><button class="btn primary sm" onclick="openContact()">＋ Add contact</button></div>
+  ${sugg.length?`<div class="card mb" style="border-color:var(--accent)"><h3>💡 Suggested outreach this week</h3>${sugg.map(({c,score})=>`<div class="spread small mb"><span><b>${esc(c.name)}</b> (${esc(c.company)}) — relationship cooling (${score}/100)</span><button class="btn sm" onclick="draftOutreach('${c.id}')">✍️ Draft message</button></div>`).join("")}</div>`:""}
+  <div class="grid g3">${S.contacts.sort((a,b)=>relScore(b)-relScore(a)).map(c=>{const sc=relScore(c);return `<div class="card" style="cursor:pointer" onclick="openContact('${c.id}')">
+    <div class="spread"><b>${esc(c.name)}</b><span class="badge ${sc>=60?"green":sc>=30?"yellow":"red"}">${sc}</span></div>
+    <div class="small muted">${esc(c.role)} · ${esc(c.company)}</div>
+    <span class="badge purple mt">${esc(c.type)}</span>
+    <div class="small muted mt">${c.interactions.length} interaction${c.interactions.length===1?"":"s"} · last ${c.interactions[0]?fmtDate(c.interactions[0].date):"never"}</div>
+    ${c.followUp?`<div class="small ${daysUntil(c.followUp)<=0?"":"muted"}">⏰ Follow up ${fmtDate(c.followUp)}</div>`:""}</div>`;}).join("")||'<div class="empty">No contacts yet — add mentors, recruiters, alumni, and peers.</div>'}</div>`;
+}
+function openContact(id){
+  const c=id?S.contacts.find(x=>x.id===id):null;
+  openModal(`<h2>${c?esc(c.name):"Add contact"}</h2>
+  <div class="row"><div style="flex:1"><label>Name</label><input id="cf_name" value="${esc(c?.name||"")}"></div><div style="flex:1"><label>Type</label><select id="cf_type">${["Mentor","Mentee","Recruiter/Hiring","Alumni","Peer","Colleague","Other"].map(t=>`<option ${c?.type===t?"selected":""}>${t}</option>`).join("")}</select></div></div>
+  <div class="row"><div style="flex:1"><label>Role</label><input id="cf_role" value="${esc(c?.role||"")}"></div><div style="flex:1"><label>Company</label><input id="cf_co" value="${esc(c?.company||"")}"></div></div>
+  <div class="row"><div style="flex:1"><label>Email</label><input id="cf_email" value="${esc(c?.email||"")}"></div><div style="flex:1"><label>LinkedIn URL</label><input id="cf_li" value="${esc(c?.linkedin||"")}"></div><div style="flex:1"><label>Follow-up date</label><input id="cf_fu" type="date" value="${c?.followUp||""}"></div></div>
+  <label>Notes</label><textarea id="cf_notes" rows="2">${esc(c?.notes||"")}</textarea>
+  ${c?`<label>Interaction log (${c.interactions.length})</label><div style="max-height:180px;overflow-y:auto">${c.interactions.map((i,idx)=>`<div class="small mb" style="border-left:3px solid var(--border);padding-left:8px"><b>${esc(i.kind)}</b> · ${fmtDate(i.date)} <button class="btn sm ghost" style="float:right" onclick="S.contacts.find(x=>x.id==='${c.id}').interactions.splice(${idx},1);save();openContact('${c.id}')">✕</button><div class="muted">${esc(i.note)}</div></div>`).join("")||'<div class="muted small">None yet</div>'}</div>
+  <div class="row mt"><select id="cf_ikind" style="flex:1">${["LinkedIn","Message","Email","Call","Coffee chat","Meeting","Interview"].map(k=>`<option>${k}</option>`).join("")}</select><input id="cf_inote" placeholder="What did you discuss?" style="flex:3"><button class="btn sm" onclick="addInteraction('${c.id}')">Log</button></div>`:""}
+  <div class="row mt"><button class="btn primary" onclick="saveContact('${id||""}')">Save</button>${c?`<button class="btn" onclick="draftOutreach('${c.id}')">✍️ Draft message</button><button class="btn danger" onclick="if(confirm('Delete contact?')){S.contacts=S.contacts.filter(x=>x.id!=='${id}');save();closeModal();render();}">Delete</button>`:""}<button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function addInteraction(id){
+  const c=S.contacts.find(x=>x.id===id);const note=$("#cf_inote").value.trim();if(!note)return;
+  c.interactions.unshift({date:today(),kind:$("#cf_ikind").value,note});markActive();save();openContact(id);toast("Logged");
+}
+function saveContact(id){
+  const g=x=>$(x).value;
+  const data={name:g("#cf_name"),type:g("#cf_type"),role:g("#cf_role"),company:g("#cf_co"),email:g("#cf_email"),linkedin:g("#cf_li"),followUp:g("#cf_fu"),notes:g("#cf_notes")};
+  if(!data.name)return toast("Name required");
+  if(id)Object.assign(S.contacts.find(x=>x.id===id),data);
+  else S.contacts.push(Object.assign({id:uid(),interactions:[]},data));
+  save();closeModal();render();toast("Saved");
+}
+function draftOutreach(id){
+  const c=S.contacts.find(x=>x.id===id);
+  const last=c.interactions[0];
+  const templates={
+    "Mentor":`Hi ${c.name.split(" ")[0]},\n\nI hope you've been well! ${last?`I've been putting your advice from our ${last.kind.toLowerCase()} to work — `:""}I've made good progress on my path toward ${S.settings.targetRole} and would love to catch up and share an update. Would you have 20 minutes in the next couple of weeks?\n\nThanks as always,\n${S.settings.name}`,
+    "Recruiter/Hiring":`Hi ${c.name.split(" ")[0]},\n\nI hope your week is going well. I'm actively exploring ${S.settings.targetRole} opportunities and ${c.company} remains at the top of my list. I'd welcome the chance to chat about current or upcoming openings on your team.\n\nBest,\n${S.settings.name}`,
+    "Alumni":`Hi ${c.name.split(" ")[0]},\n\nFellow alum here — I hope things are great at ${c.company}! I'm working toward a ${S.settings.targetRole} role and would really value hearing about your experience there. Any chance you'd be open to a quick chat?\n\nGo Owls!\n${S.settings.name}`,
+    "default":`Hi ${c.name.split(" ")[0]},\n\nIt's been a while since we last connected${last?` (${last.kind.toLowerCase()}, ${fmtDate(last.date)})`:""} — I hope everything's going well at ${c.company}! I'd love to catch up soon and hear what you've been working on.\n\nBest,\n${S.settings.name}`};
+  const body=templates[c.type]||templates.default;
+  openModal(`<h2>✍️ Outreach draft — ${esc(c.name)}</h2><textarea rows="10" id="ordraft">${esc(body)}</textarea>
+  <div class="row mt"><button class="btn primary" onclick="navigator.clipboard.writeText($('#ordraft').value).then(()=>toast('Copied — paste into LinkedIn/email'))">Copy</button>
+  <button class="btn" onclick="const c=S.contacts.find(x=>x.id==='${id}');c.interactions.unshift({date:today(),kind:'Message',note:'Sent outreach message'});save();closeModal();render();toast('Marked as sent')">Mark sent</button>
+  <button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+function exportContactsCSV(){
+  const rows=[["Name","Type","Role","Company","Email","LinkedIn","LastInteraction","RelScore"]];
+  S.contacts.forEach(c=>rows.push([c.name,c.type,c.role,c.company,c.email,c.linkedin,c.interactions[0]?.date||"",relScore(c)]));
+  download("careeros-contacts.csv",rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n"),"text/csv");toast("CSV downloaded");
+}
+/* ============ INTERVIEW CENTER ============ */
+const BEHAVIORAL_QS=["Tell me about a time you had a conflict with a teammate. How did you resolve it?","Describe a project you're most proud of. What was your specific contribution?","Tell me about a time you failed. What did you learn?","Describe a situation where you had to meet a tight deadline.","Tell me about a time you had to learn a new technology quickly.","Describe a time you disagreed with your manager's decision.","Tell me about a time you improved a process or system.","How have you handled receiving critical feedback?","Describe a time you had to influence others without authority.","Tell me about a time you made a mistake in production. What did you do?","Describe a situation where requirements changed mid-project.","Tell me about a time you mentored someone."];
+const TECH_QS=[
+ {q:"What is the time complexity of binary search, and why?",a:["O(log n) — the search space halves each step","O(n) — you check each element","O(n log n) — divide and conquer","O(1) — direct index access"],c:0},
+ {q:"Which data structure gives O(1) average insert, delete, and lookup?",a:["Hash table","Binary search tree","Sorted array","Linked list"],c:0},
+ {q:"In SQL, what does an INNER JOIN return?",a:["Only rows with matches in both tables","All rows from the left table","All rows from both tables","Rows with no matches"],c:0},
+ {q:"What problem do database indexes primarily solve?",a:["Slow reads on large tables","Data integrity","Write throughput","Storage space"],c:0},
+ {q:"What is idempotency in API design?",a:["Repeating a request yields the same result","Requests are encrypted","Requests are ordered","Requests are cached"],c:0},
+ {q:"Which is TRUE about REST vs message queues?",a:["Queues decouple producers/consumers and absorb bursts","REST is always faster","Queues guarantee exactly-once by default","REST can't be load balanced"],c:0},
+ {q:"What does the CAP theorem say a distributed system must sacrifice during a network partition?",a:["Either consistency or availability","Both consistency and availability","Durability","Latency"],c:0},
+ {q:"What's the main benefit of connection pooling?",a:["Avoids the cost of opening a DB connection per request","Encrypts connections","Prevents SQL injection","Increases storage"],c:0},
+ {q:"When is a cache-aside pattern appropriate?",a:["Read-heavy workloads tolerating slight staleness","Write-heavy workloads","Strong consistency requirements","Small datasets only"],c:0},
+ {q:"Which HTTP status code fits 'resource created'?",a:["201","200","301","404"],c:0},
+ {q:"BFS vs DFS: which finds the shortest path in an unweighted graph?",a:["BFS","DFS","Both equally","Neither"],c:0},
+ {q:"What is a race condition?",a:["Outcome depends on unsynchronized timing of threads","A slow query","An infinite loop","A memory leak"],c:0}];
+const CODING_CHALLENGES=[
+ {t:"Two Sum",d:"Given an array of integers and a target, return indices of the two numbers that add to the target.",hint:"Hash map of value→index; one pass. O(n).",lvl:"Easy"},
+ {t:"Merge Intervals",d:"Given intervals, merge all overlapping ones.",hint:"Sort by start; extend current interval when next.start <= current.end.",lvl:"Medium"},
+ {t:"LRU Cache",d:"Design a data structure with O(1) get and put, evicting the least-recently-used item at capacity.",hint:"Hash map + doubly linked list (or an ordered map).",lvl:"Medium"},
+ {t:"Course Schedule",d:"Given prerequisites, can all courses be finished? (cycle detection)",hint:"Topological sort — Kahn's algorithm or DFS with visit states.",lvl:"Medium"},
+ {t:"Word Ladder",d:"Shortest transformation sequence between two words changing one letter at a time.",hint:"BFS over the word graph; precompute wildcard buckets (h*t).",lvl:"Hard"},
+ {t:"Serialize Binary Tree",d:"Serialize and deserialize a binary tree.",hint:"Preorder with null markers, or BFS level encoding.",lvl:"Hard"}];
+const DESIGN_QS=[
+ {q:"Design a URL shortener (bit.ly)",rubric:["API design (create/redirect)","ID generation (base62, collision handling)","Data model & storage choice","Caching hot URLs","Scale estimates (QPS, storage)","Analytics (click tracking)"]},
+ {q:"Design a rate limiter",rubric:["Algorithm choice (token bucket, sliding window)","Where it lives (gateway, middleware)","Distributed coordination (Redis)","Response semantics (429, headers)","Multi-tier limits","Failure mode (fail open/closed)"]},
+ {q:"Design a chat system (WhatsApp)",rubric:["Connection model (WebSocket)","Message delivery & ordering","Online presence","Storage & fan-out","Group chats","Offline delivery / push"]},
+ {q:"Design a news feed (Twitter timeline)",rubric:["Fan-out on write vs read","Feed ranking","Celebrity problem","Caching strategy","Pagination","Media handling"]},
+ {q:"Design a distributed job scheduler",rubric:["Job store & state machine","Worker pull vs push","Exactly-once vs at-least-once","Retries & backoff","Priority queues","Observability"]},
+ {q:"Design YouTube (video upload & streaming)",rubric:["Upload pipeline & chunking","Transcoding workers","CDN strategy","Metadata service","View counting at scale","Recommendations (high level)"]}];
+const FILLERS=["um","uh","like","you know","basically","actually","kind of","sort of","i mean","stuff"];
+let IV={active:false};
+function analyzeAnswer(text,kind){
+  const t=text.toLowerCase();const words=text.trim().split(/\s+/).filter(Boolean);
+  let score=0;const fb=[],str=[];
+  const fillerCount=FILLERS.reduce((n,f)=>n+(t.match(new RegExp("\\b"+f.replace(" ","\\s+")+"\\b","g"))||[]).length,0);
+  const clarity=Math.max(0,100-Math.round(300*fillerCount/Math.max(20,words.length)));
+  if(kind==="behavioral"){
+    const star={Situation:/\b(when|while|at the time|situation|context|during|last year|in my (role|job|team))\b/.test(t),
+      Task:/\b(task|goal|responsib|needed to|had to|asked to|my job was)\b/.test(t),
+      Action:/\b(i (decided|built|led|created|organized|implemented|wrote|spoke|proposed|refactored|set up|reached out|analyzed))\b/.test(t),
+      Result:/\b(result|outcome|improved|increased|reduced|saved|led to|as a result|ended up|learned|shipped|delivered)\b/.test(t)};
+    const hits=Object.values(star).filter(Boolean).length;score+=hits*18;
+    Object.entries(star).forEach(([k,v])=>v?str.push(k+" ✓"):fb.push(`Missing clear ${k} — STAR answers need it`));
+    if(/\d/.test(text)){score+=12;str.push("Quantified impact ✓");}else fb.push("Add numbers (%, time, scale) to the result");
+    if(/\bwe\b/.test(t)&&!/\bi\b/.test(t))fb.push('Too much "we" — interviewers want YOUR contribution ("I")');
+    if(words.length<40)fb.push("Answer is thin — aim for 60–150 words with concrete detail");
+    else if(words.length>280)fb.push("Answer is long — tighten to ~2 minutes");
+    else score+=16;
+  }else if(kind==="design"){
+    const aspects={"requirements/estimates":/\b(requirement|estimate|qps|users|scale|traffic|assumption)\b/,"API":/\b(api|endpoint|request|rest|grpc)\b/,"data model":/\b(schema|table|database|data model|store|postgres|sql|nosql)\b/,"caching":/\b(cache|redis|cdn|memcache)\b/,"scaling":/\b(shard|partition|replica|load balanc|horizontal|queue|async)\b/,"trade-offs":/\b(trade|versus|vs|alternative|instead|depends|downside)\b/};
+    Object.entries(aspects).forEach(([k,re])=>{if(re.test(t)){score+=14;str.push("Covered "+k);}else fb.push("Didn't address "+k);});
+    if(words.length>100)score+=16;else fb.push("Go deeper — real interviews expect 30–45 min of depth");
+  }else{
+    if(/\b(o\(|complexity|time|space)\b/.test(t)){score+=25;str.push("Discussed complexity ✓");}else fb.push("State time/space complexity");
+    if(/\b(edge|empty|null|overflow|duplicate|negative)\b/.test(t)){score+=25;str.push("Considered edge cases ✓");}else fb.push("Mention edge cases");
+    if(/\b(hash|map|set|tree|heap|stack|queue|array|pointer|graph|dp|dynamic)\b/.test(t)){score+=25;str.push("Named data structures ✓");}else fb.push("Name the data structures/algorithms you'd use");
+    if(words.length>=30)score+=15;else fb.push("Explain your approach out loud — thin explanations lose points");
+  }
+  score=Math.max(5,Math.min(100,score));
+  if(fillerCount>3)fb.push(`${fillerCount} filler words detected — pause silently instead`);
+  const confidence=Math.min(100,Math.round(score*0.6+clarity*0.4));
+  return{score,clarity,confidence,fb,str,fillerCount,words:words.length};
+}
+function viewInterview(){
+  if(IV.active)return ivSession();
+  const recent=S.sessions.slice().reverse().slice(0,6);
+  return `<div class="grid g3 mb">
+    <div class="card"><h3>🗣️ Behavioral</h3><p class="small muted">STAR-format questions with follow-ups and scoring.</p><button class="btn primary mt" onclick="startIV('behavioral')">Start mock interview</button></div>
+    <div class="card"><h3>💻 Technical</h3><p class="small muted">CS fundamentals quiz + coding challenges with your language.</p><div class="row mt"><button class="btn primary" onclick="startIV('technical')">Quiz</button><button class="btn" onclick="startIV('coding')">Coding challenge</button></div></div>
+    <div class="card"><h3>🏗️ System Design</h3><p class="small muted">Design prompts scored against a real rubric.</p><button class="btn primary mt" onclick="startIV('design')">Start design round</button></div></div>
+  <div class="card mb"><h3>🎙️ Voice mode</h3><p class="small muted">Answer out loud — your speech is transcribed and analyzed for clarity, confidence, and filler words. ${("webkitSpeechRecognition"in window||"SpeechRecognition"in window)?'<span class="badge green">Supported in this browser</span>':'<span class="badge yellow">Not supported in this browser — use Chrome/Edge</span>'}</p></div>
+  <div class="card"><h3>Session history & feedback reports</h3>
+  ${recent.length?`<table><tr><th>Date</th><th>Type</th><th>Score</th><th>Clarity</th><th>Confidence</th><th></th></tr>${recent.map((s,i)=>`<tr><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td><b>${s.score}</b>/100</td><td>${s.metrics?.clarity??"—"}</td><td>${s.metrics?.confidence??"—"}</td><td><button class="btn sm" onclick="viewReport('${s.id}')">📋 Report</button></td></tr>`).join("")}</table>`:'<div class="muted small">No sessions yet — your feedback reports and transcripts will appear here.</div>'}</div>`;
+}
+function startIV(type){
+  markActive();
+  const qs=type==="behavioral"?shuffle(BEHAVIORAL_QS).slice(0,3).map(q=>({q})):
+    type==="technical"?shuffle(TECH_QS).slice(0,8):
+    type==="design"?[shuffle(DESIGN_QS)[0]]:
+    [shuffle(CODING_CHALLENGES)[0]];
+  IV={active:true,type,qs,i:0,answers:[],voice:false,lang:"JavaScript",startTs:Date.now()};
+  render();
+}
+function shuffle(a){return a.slice().sort(()=>Math.random()-.5);}
+function ivSession(){
+  const t=IV.type;const q=IV.qs[IV.i];
+  const head=`<div class="spread mb"><b>Mock interview — ${t}</b><div class="row"><span class="badge blue">Question ${IV.i+1}/${IV.qs.length}</span><button class="btn sm danger" onclick="IV={active:false};render()">End session</button></div></div>`;
+  if(t==="technical"){
+    return head+`<div class="card"><p style="font-size:16px"><b>${esc(q.q)}</b></p><div class="mt">${q.a.map((opt,i)=>`<button class="btn mt" style="display:block;width:100%;text-align:left" onclick="answerMCQ(${i})">${String.fromCharCode(65+i)}. ${esc(opt)}</button>`).join("")}</div></div>`;
+  }
+  if(t==="coding"){
+    return head+`<div class="card mb"><div class="spread"><b style="font-size:16px">${esc(q.t)}</b><span class="badge ${q.lvl==="Easy"?"green":q.lvl==="Medium"?"yellow":"red"}">${q.lvl}</span></div><p class="mt">${esc(q.d)}</p>
+    <label>Language</label><select onchange="IV.lang=this.value">${["JavaScript","Python","Java","Go","C++","TypeScript","Rust"].map(l=>`<option ${IV.lang===l?"selected":""}>${l}</option>`).join("")}</select>
+    <label>Your solution (${esc(IV.lang)}) — explain your approach in comments too</label><textarea id="ivcode" rows="12" style="font-family:ui-monospace,monospace" placeholder="// Explain approach, then code…"></textarea>
+    <div class="row mt"><button class="btn primary" onclick="submitCoding()">Submit for review</button><button class="btn" onclick="toast('Hint: ${esc(q.hint).replace(/'/g,"")}')">💡 Hint</button></div></div>`;
+  }
+  return head+`<div class="card mb"><p style="font-size:16px"><b>${esc(q.q)}</b></p>
+  ${t==="design"?`<div class="small muted mt">Describe your architecture in text (components, data flow, trade-offs). Diagrams: describe boxes & arrows in words.</div>`:""}
+  <label>Your answer ${t==="behavioral"?"(use STAR: Situation → Task → Action → Result)":""}</label>
+  <textarea id="ivanswer" rows="8" placeholder="Type your answer, or use voice…"></textarea>
+  <div class="row mt"><button class="btn primary" onclick="submitAnswer()">Submit answer</button>
+  ${("webkitSpeechRecognition"in window||"SpeechRecognition"in window)?`<button class="btn ${IV.voice?"success":""}" id="micbtn" onclick="toggleMic()">🎙️ ${IV.voice?"Stop recording":"Answer by voice"}</button>`:""}
+  <button class="btn ghost" onclick="speakQuestion()">🔊 Read question aloud</button></div></div>`;
+}
+let recog=null;
+function toggleMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(IV.voice){IV.voice=false;if(recog)recog.stop();$("#micbtn").textContent="🎙️ Answer by voice";return;}
+  recog=new SR();recog.continuous=true;recog.interimResults=true;IV.voice=true;$("#micbtn").textContent="⏹ Stop recording";
+  recog.onresult=e=>{let final="";for(const r of e.results)if(r.isFinal)final+=r[0].transcript+" ";if(final)$("#ivanswer").value=($("#ivanswer").value+" "+final).trim();};
+  recog.onend=()=>{IV.voice=false;const b=$("#micbtn");if(b)b.textContent="🎙️ Answer by voice";};
+  recog.start();toast("Listening… speak your answer");
+}
+function speakQuestion(){const q=IV.qs[IV.i];const u=new SpeechSynthesisUtterance(q.q||q.t);speechSynthesis.speak(u);}
+function submitAnswer(){
+  const text=$("#ivanswer").value.trim();if(!text)return toast("Answer first (type or voice)");
+  const q=IV.qs[IV.i];const kind=IV.type==="design"?"design":"behavioral";
+  const an=analyzeAnswer(text,kind);
+  if(IV.type==="design")an.rubricHits=q.rubric.map(r=>({r,hit:r.toLowerCase().split(/[ (]/).some(w=>w.length>3&&text.toLowerCase().includes(w))}));
+  IV.answers.push({q:q.q,a:text,an});
+  nextIV();
+}
+function answerMCQ(i){const q=IV.qs[IV.i];IV.answers.push({q:q.q,a:q.a[i],correct:i===q.c,correctAns:q.a[q.c]});nextIV();}
+function submitCoding(){
+  const code=$("#ivcode").value.trim();if(!code)return toast("Write a solution first");
+  const q=IV.qs[IV.i];const an=analyzeAnswer(code,"coding");
+  const checks=[];
+  if(/function|def |func |=>|class /.test(code))checks.push("Defines a function/structure ✓");else an.fb.push("No function definition detected");
+  if(/\/\/|#|\/\*/.test(code))checks.push("Includes comments/explanation ✓");else an.fb.push("Add comments explaining your approach");
+  if(/if|for|while|map|reduce|forEach/.test(code))checks.push("Has control flow ✓");
+  an.str.push(...checks);
+  IV.answers.push({q:q.t+" — "+q.d,a:code,an,hint:q.hint});
+  nextIV();
+}
+function nextIV(){
+  IV.i++;
+  if(IV.i<IV.qs.length){render();return;}
+  finishIV();
+}
+function finishIV(){
+  let score,metrics={};
+  if(IV.type==="technical"){const right=IV.answers.filter(a=>a.correct).length;score=Math.round(100*right/IV.answers.length);}
+  else{score=Math.round(IV.answers.reduce((s,a)=>s+a.an.score,0)/IV.answers.length);
+    metrics={clarity:Math.round(IV.answers.reduce((s,a)=>s+a.an.clarity,0)/IV.answers.length),confidence:Math.round(IV.answers.reduce((s,a)=>s+a.an.confidence,0)/IV.answers.length)};}
+  const sess={id:uid(),type:IV.type,date:now(),score,metrics,transcript:IV.answers,durationMin:Math.round((Date.now()-IV.startTs)/60000)};
+  S.sessions.push(sess);markActive();save();IV={active:false};render();viewReport(sess.id);
+}
+function viewReport(id){
+  const s=S.sessions.find(x=>x.id===id);
+  const allFb=[...new Set((s.transcript||[]).flatMap(a=>a.an?.fb||[]))];
+  const allStr=[...new Set((s.transcript||[]).flatMap(a=>a.an?.str||[]))];
+  openModal(`<h2>📋 Feedback report — ${esc(s.type)}</h2>
+  <div class="row mb"><div style="text-align:center;flex:1"><div class="big">${s.score}</div><div class="small muted">score</div></div>
+  ${s.metrics?.clarity!=null?`<div style="text-align:center;flex:1"><div class="big">${s.metrics.clarity}</div><div class="small muted">clarity</div></div><div style="text-align:center;flex:1"><div class="big">${s.metrics.confidence}</div><div class="small muted">confidence</div></div>`:""}
+  <div style="text-align:center;flex:1"><div class="big">${s.durationMin||0}m</div><div class="small muted">duration</div></div></div>
+  ${allStr.length?`<b class="small" style="color:var(--accent2)">Strengths</b><div class="small muted mb">${allStr.map(esc).join(" · ")}</div>`:""}
+  ${allFb.length?`<b class="small" style="color:var(--warn)">Improve</b><div class="small muted mb">${allFb.map(f=>"• "+esc(f)).join("<br>")}</div>`:""}
+  <b class="small">Transcript playback</b>
+  <div style="max-height:300px;overflow-y:auto" class="mt">${(s.transcript||[]).map(a=>`<div class="card mb" style="background:var(--bg)"><div class="small"><b>Q:</b> ${esc(a.q)}</div><div class="small mt"><b>A:</b> <span class="muted">${esc(String(a.a).slice(0,600))}</span></div>${a.correct!=null?`<div class="small mt">${a.correct?'<span class="badge green">Correct</span>':`<span class="badge red">Incorrect</span> <span class="muted">Answer: ${esc(a.correctAns)}</span>`}</div>`:""}${a.an?`<div class="small mt">Score: <b>${a.an.score}</b>${a.an.fillerCount?` · fillers: ${a.an.fillerCount}`:""}${a.hint?` · <span class="muted">Model approach: ${esc(a.hint)}</span>`:""}</div>`:""}${a.an?.rubricHits?`<div class="pill-row mt">${a.an.rubricHits.map(r=>`<span class="badge ${r.hit?"green":"red"}">${esc(r.r)}</span>`).join("")}</div>`:""}</div>`).join("")}</div>
+  <button class="btn mt" onclick="closeModal()">Close</button>`);
+}
+/* ============ CERTIFICATIONS ============ */
+const CERT_CATALOG=["AWS Solutions Architect Associate","AWS Developer Associate","AWS Cloud Practitioner","Microsoft AZ-900","Microsoft AZ-104","Google Cloud ACE","CompTIA A+","CompTIA Network+","CompTIA Security+","Cisco CCNA","Kubernetes CKA","Terraform Associate","Other…"];
+const EXAM_BANK={
+"AWS":[{q:"Which service is best for decoupling microservices with pull-based messaging?",a:["SQS","SNS","EventBridge","Kinesis"],c:0},{q:"Which S3 feature enforces that objects can't be deleted for a period?",a:["Object Lock","Versioning","Lifecycle rules","ACLs"],c:0},{q:"An EC2 instance needs AWS API access. Best practice?",a:["IAM role attached to the instance","Access keys in user data","Root credentials","Hardcoded keys in code"],c:0},{q:"Which database is serverless and scales automatically for key-value workloads?",a:["DynamoDB","RDS MySQL","Redshift","Neptune"],c:0},{q:"To serve static content globally with low latency, use:",a:["CloudFront","Direct Connect","VPN Gateway","ELB"],c:0},{q:"Which gives you a private network in AWS?",a:["VPC","Route 53","IAM","CloudTrail"],c:0},{q:"Multi-AZ RDS primarily provides:",a:["High availability/failover","Read scaling","Cost savings","Encryption"],c:0},{q:"Which storage is ephemeral?",a:["Instance store","EBS","EFS","S3"],c:0}],
+"CompTIA":[{q:"Which attack intercepts communication between two parties?",a:["On-path (MITM)","Phishing","Brute force","SQL injection"],c:0},{q:"What does the principle of least privilege mean?",a:["Users get only the access they need","All users are admins","Passwords expire monthly","Data is always encrypted"],c:0},{q:"Which protocol secures web traffic?",a:["TLS","FTP","Telnet","SNMPv1"],c:0},{q:"What is the FIRST phase of incident response?",a:["Preparation","Eradication","Recovery","Containment"],c:0},{q:"MFA combines at least two of:",a:["Something you know/have/are","Two passwords","Two usernames","Two devices only"],c:0},{q:"A honeypot is used to:",a:["Attract and study attackers","Encrypt data","Filter spam","Back up files"],c:0},{q:"Which hashing algorithm is considered broken for security use?",a:["MD5","SHA-256","SHA-3","bcrypt"],c:0},{q:"RAID 1 provides:",a:["Mirroring","Striping only","Parity striping","No redundancy"],c:0}],
+"default":[{q:"Which OSI layer handles routing?",a:["Layer 3 (Network)","Layer 2","Layer 7","Layer 1"],c:0},{q:"What does DNS do?",a:["Resolves names to IP addresses","Encrypts traffic","Routes packets","Assigns MACs"],c:0},{q:"What is Infrastructure as Code?",a:["Managing infra via versioned config files","Writing app code on servers","Manual server setup","A programming language"],c:0},{q:"Containers differ from VMs because they:",a:["Share the host OS kernel","Include a full OS","Are always slower","Can't be networked"],c:0},{q:"What is horizontal scaling?",a:["Adding more machines","Adding more CPU to one machine","Adding storage","Reducing servers"],c:0},{q:"A load balancer primarily:",a:["Distributes traffic across servers","Stores data","Compiles code","Blocks all attacks"],c:0},{q:"What is a CIDR block?",a:["An IP address range notation","A firewall rule","A DNS record","A container image"],c:0},{q:"Which is a NoSQL database?",a:["MongoDB","PostgreSQL","MySQL","MariaDB"],c:0}]};
+let EXAM=null,FC=null;
+function certBank(c){return EXAM_BANK[c.provider]||EXAM_BANK[Object.keys(EXAM_BANK).find(k=>c.name.includes(k))]||EXAM_BANK.default;}
+function viewCerts(){
+  if(EXAM)return examView();
+  if(FC)return flashView();
+  const cid=window._navArg;
+  return `<div class="spread mb"><div></div><button class="btn primary sm" onclick="addCert()">＋ Track certification</button></div>
+  <div class="grid g2">${S.certs.map(c=>{const du=daysUntil(c.targetDate);const lastExam=c.examHistory[c.examHistory.length-1];
+    return `<div class="card" ${cid===c.id?'style="border-color:var(--accent)"':""}>
+    <div class="spread"><b>${esc(c.name)}</b><span class="badge purple">${esc(c.provider)}</span></div>
+    <div class="small muted mb">Target: ${fmtDate(c.targetDate)} ${du!=null?`(${du} days)`:""} · Plan: ${c.plan.dailyMin} min/day, ${c.plan.weeklyTopics} topic${c.plan.weeklyTopics>1?"s":""}/week</div>
+    <div class="spread small"><span>Progress</span><b>${c.progress}%</b></div>
+    <div class="progress green mb"><div style="width:${c.progress}%"></div></div>
+    <input type="range" min="0" max="100" value="${c.progress}" onchange="const c=S.certs.find(x=>x.id==='${c.id}');c.progress=+this.value;markActive();save();render()">
+    ${lastExam?`<div class="small muted mt">Last practice exam: <b>${lastExam.score}%</b> ${lastExam.score>=72?'<span class="badge green">passing range</span>':'<span class="badge yellow">below passing — keep studying</span>'}</div>`:""}
+    <div class="row mt"><button class="btn sm primary" onclick="startExam('${c.id}')">📝 Practice exam</button>
+    <button class="btn sm" onclick="startFlash('${c.id}')">🃏 Flashcards (${c.flashcards.length})</button>
+    <button class="btn sm" onclick="aiGenFlash('${c.id}')">✨ AI-generate cards</button>
+    <button class="btn sm" onclick="editCertPlan('${c.id}')">📆 Plan</button>
+    ${c.progress>=100?`<button class="btn sm success" onclick="completeCert('${c.id}')">✓ Mark complete</button>`:""}
+    <button class="btn sm danger ghost" onclick="if(confirm('Remove?')){S.certs=S.certs.filter(x=>x.id!=='${c.id}');save();render();}">✕</button></div>
+    ${c.examHistory.length>1?`<div class="small muted mt">Score trend: ${c.examHistory.map(e=>e.score+"%").join(" → ")}</div>`:""}</div>`;}).join("")||'<div class="empty">Track AWS, CompTIA, Cisco, Google Cloud and more.</div>'}</div>`;
+}
+function addCert(){
+  openModal(`<h2>Track a certification</h2><label>Certification</label><select id="ct_name">${CERT_CATALOG.map(c=>`<option>${c}</option>`).join("")}</select>
+  <label>Custom name (if Other)</label><input id="ct_custom"><label>Target exam date</label><input type="date" id="ct_date">
+  <div class="row mt"><button class="btn primary" onclick="saveCert()">Add</button><button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function saveCert(){
+  let name=$("#ct_name").value;if(name==="Other…")name=$("#ct_custom").value||"Custom certification";
+  const provider=["AWS","Microsoft","Google","CompTIA","Cisco","Kubernetes","Terraform"].find(p=>name.includes(p))||"Other";
+  S.certs.push({id:uid(),name,provider,targetDate:$("#ct_date").value,progress:0,plan:{dailyMin:30,weeklyTopics:1},flashcards:[],examHistory:[]});
+  save();closeModal();render();toast("Added");
+}
+function editCertPlan(id){
+  const c=S.certs.find(x=>x.id===id);
+  openModal(`<h2>📆 Study plan — ${esc(c.name)}</h2>
+  <label>Daily study target (minutes)</label><input type="number" id="cp_daily" value="${c.plan.dailyMin}">
+  <label>Topics per week</label><input type="number" id="cp_weekly" value="${c.plan.weeklyTopics}">
+  <label>Target exam date</label><input type="date" id="cp_date" value="${c.targetDate||""}">
+  <div class="small muted mt">💡 ${daysUntil(c.targetDate)!=null?`With ${daysUntil(c.targetDate)} days left and ${100-c.progress}% remaining, you need ~${Math.max(1,Math.ceil((100-c.progress)/Math.max(1,daysUntil(c.targetDate))))}% progress per day.`:"Set a target date to get pacing guidance."}</div>
+  <div class="row mt"><button class="btn primary" onclick="const c=S.certs.find(x=>x.id==='${id}');c.plan.dailyMin=+$('#cp_daily').value;c.plan.weeklyTopics=+$('#cp_weekly').value;c.targetDate=$('#cp_date').value;save();closeModal();render();S.tasks.push({id:uid(),text:'Study ${esc(c.name).replace(/'/g,"")} — '+c.plan.dailyMin+' min',done:false,date:today()});save();toast('Plan saved + daily task added')">Save & add daily task</button><button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function completeCert(id){
+  const c=S.certs.find(x=>x.id===id);
+  toast("🎉 "+c.name+" complete!");
+  if(S.automations.find(a=>a.trigger==="cert_complete"&&a.on)){
+    S.tasks.push({id:uid(),text:"Update resume with "+c.name,done:false,date:today()});
+    S.tasks.push({id:uid(),text:"Post LinkedIn update about earning "+c.name,done:false,date:today()});
+    const r=S.resumes[0];if(r&&!r.sections.skills.includes(c.name)){snapshotResume(r);r.sections.skills+=", "+c.name;}
+    toast("🤖 Automation: resume updated + LinkedIn task created");
+  }
+  markActive();save();render();
+}
+function startExam(id){
+  const c=S.certs.find(x=>x.id===id);
+  EXAM={certId:id,qs:shuffle(certBank(c)),i:0,answers:[],review:false};render();
+}
+function examView(){
+  const c=S.certs.find(x=>x.id===EXAM.certId);
+  if(EXAM.review){
+    const right=EXAM.answers.filter(a=>a.pick===a.q.c).length;const pct=Math.round(100*right/EXAM.answers.length);
+    return `<div class="card"><div class="spread"><b>📝 ${esc(c.name)} — Results</b><button class="btn sm" onclick="EXAM=null;render()">Done</button></div>
+    <div class="row mt mb">${ring(pct,pct>=72?"var(--accent2)":"var(--danger)","%")}<div><div class="big">${right}/${EXAM.answers.length}</div><div class="small muted">${pct>=72?"Passing range 🎉":"Most exams need ~72% — review below"}</div></div></div>
+    <b class="small">Review mode</b>
+    ${EXAM.answers.map(a=>`<div class="card mt" style="background:var(--bg)"><div class="small"><b>${esc(a.q.q)}</b></div>
+      ${a.q.a.map((opt,i)=>`<div class="small mt" style="${i===a.q.c?"color:var(--accent2)":i===a.pick?"color:var(--danger)":""}">${i===a.q.c?"✅":i===a.pick?"❌":"·"} ${esc(opt)}</div>`).join("")}</div>`).join("")}</div>`;
+  }
+  const q=EXAM.qs[EXAM.i];
+  return `<div class="card"><div class="spread"><b>📝 ${esc(c.name)} practice exam</b><span class="badge blue">${EXAM.i+1}/${EXAM.qs.length}</span></div>
+  <p class="mt" style="font-size:15px"><b>${esc(q.q)}</b></p>
+  ${shuffleIdx(q).map(i=>`<button class="btn mt" style="display:block;width:100%;text-align:left" onclick="examAnswer(${i})">${esc(q.a[i])}</button>`).join("")}
+  <button class="btn sm ghost mt" onclick="EXAM=null;render()">Quit</button></div>`;
+}
+function shuffleIdx(q){return shuffle(q.a.map((_,i)=>i));}
+function examAnswer(i){
+  EXAM.answers.push({q:EXAM.qs[EXAM.i],pick:i});EXAM.i++;
+  if(EXAM.i>=EXAM.qs.length){
+    const c=S.certs.find(x=>x.id===EXAM.certId);
+    const right=EXAM.answers.filter(a=>a.pick===a.q.c).length;
+    c.examHistory.push({date:today(),score:Math.round(100*right/EXAM.answers.length),total:100});
+    EXAM.review=true;markActive();save();
+  }
+  render();
+}
+function startFlash(id){
+  const c=S.certs.find(x=>x.id===id);
+  if(!c.flashcards.length)return openModal(`<h2>No flashcards yet</h2><p class="muted small">Create your own or let AI generate a starter set.</p><div class="row mt"><button class="btn primary" onclick="closeModal();addFlash('${id}')">＋ Create card</button><button class="btn" onclick="closeModal();aiGenFlash('${id}')">✨ AI-generate</button></div>`);
+  const due=c.flashcards.slice().sort((a,b)=>(a.box||1)-(b.box||1));
+  FC={certId:id,cards:due,i:0,flipped:false};render();
+}
+function flashView(){
+  const c=S.certs.find(x=>x.id===FC.certId);const card=FC.cards[FC.i];
+  if(!card)return `<div class="card"><b>🃏 Deck complete!</b><p class="small muted mt">Cards you marked "hard" will surface first next time (spaced repetition boxes).</p><button class="btn mt" onclick="FC=null;markActive();save();render()">Done</button></div>`;
+  return `<div class="spread mb"><b>🃏 ${esc(c.name)}</b><div class="row"><span class="badge blue">${FC.i+1}/${FC.cards.length}</span><button class="btn sm" onclick="addFlash('${c.id}')">＋ Card</button><button class="btn sm" onclick="FC=null;render()">Exit</button></div></div>
+  <div class="flashcard" onclick="FC.flipped=!FC.flipped;render()">${esc(FC.flipped?card.back:card.front)}<br><br><span class="small muted">${FC.flipped?"(answer — click to flip back)":"(click to reveal answer)"}</span></div>
+  ${FC.flipped?`<div class="row mt" style="justify-content:center"><button class="btn danger" onclick="rateFlash(1)">Hard</button><button class="btn" onclick="rateFlash(2)">Okay</button><button class="btn success" onclick="rateFlash(3)">Easy</button></div>`:""}`;
+}
+function rateFlash(box){const card=FC.cards[FC.i];card.box=box;FC.i++;FC.flipped=false;save();render();}
+function addFlash(id){
+  openModal(`<h2>New flashcard</h2><label>Front (question)</label><textarea id="ff_f" rows="2"></textarea><label>Back (answer)</label><textarea id="ff_b" rows="2"></textarea>
+  <div class="row mt"><button class="btn primary" onclick="const c=S.certs.find(x=>x.id==='${id}');c.flashcards.push({id:uid(),front:$('#ff_f').value,back:$('#ff_b').value,box:1});save();closeModal();render();toast('Card added')">Add</button><button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function aiGenFlash(id){
+  const c=S.certs.find(x=>x.id===id);
+  const bank=certBank(c);
+  let added=0;
+  bank.forEach(q=>{if(!c.flashcards.some(f=>f.front===q.q)){c.flashcards.push({id:uid(),front:q.q,back:q.a[q.c],box:1});added++;}});
+  save();render();toast(added?`✨ Generated ${added} flashcards from the ${c.provider} question bank`:"All bank questions already in your deck — add custom cards!");
+}
+/* ============ LEARNING DASHBOARD ============ */
+const LEARN_TYPES=["Book","Course","Coding practice","Degree","YouTube course","Lab","Project","Other"];
+function viewLearning(){
+  const gap=skillGap(S.settings.targetRole,S.resumes[0]);
+  const recs=learnRecs(gap);
+  return `<div class="spread mb">
+    <div class="row"><span class="badge green">🔥 ${streakDays()}-day streak</span><span class="badge blue">${consistency()}% consistency (28d)</span></div>
+    <button class="btn primary sm" onclick="openLearn()">＋ Track learning item</button></div>
+  ${recs.length?`<div class="card mb" style="border-color:var(--accent)"><h3>🤖 What to learn next — for ${esc(S.settings.targetRole)}</h3>${recs.map(r=>`<div class="spread small mb"><span>${r.icon} <b>${esc(r.title)}</b> — <span class="muted">${esc(r.why)}</span></span><button class="btn sm" onclick='addLearnFromRec(${JSON.stringify(r.title).replace(/'/g,"&#39;")},"${r.type}")'>＋ Add</button></div>`).join("")}</div>`:""}
+  <div class="grid g2">${S.learning.map(l=>{const pct=Math.min(100,Math.round(100*l.done/Math.max(1,l.total)));
+    return `<div class="card"><div class="spread"><b>${esc(l.title)}</b><span class="badge purple">${esc(l.type)}</span></div>
+    <div class="spread small mt"><span class="muted">${l.done} / ${l.total} ${esc(l.unit)}</span><b>${pct}%</b></div>
+    <div class="progress ${pct===100?"green":""} mb"><div style="width:${pct}%"></div></div>
+    <div class="row"><input type="number" id="lg_${l.id}" placeholder="+ progress" style="width:110px"><button class="btn sm" onclick="logLearn('${l.id}')">Log</button>
+    <span class="small muted">last: ${l.log[0]?fmtDate(l.log[0]):"never"}</span>
+    <button class="btn sm ghost danger" style="margin-left:auto" onclick="if(confirm('Remove?')){S.learning=S.learning.filter(x=>x.id!=='${l.id}');save();render();}">✕</button></div></div>`;}).join("")||'<div class="empty">Track books, courses, LeetCode, degree programs, and projects.</div>'}</div>`;
+}
+function learnRecs(gap){
+  const map={"System design":{title:"System Design Primer / DDIA",type:"Course",icon:"🏗️",why:"top gap for backend interviews"},"Message queues (Kafka/SQS)":{title:"Kafka fundamentals course + demo project",type:"Course",icon:"📨",why:"missing from your skills"},"Kubernetes":{title:"CKA basics / K8s the Hard Way (guided)",type:"Lab",icon:"☸️",why:"missing from your skills"},"Testing":{title:"Testing JavaScript (unit + integration)",type:"Course",icon:"🧪",why:"strengthens every application"},"Observability / monitoring":{title:"Grafana + Prometheus mini-lab",type:"Lab",icon:"📈",why:"missing from your skills"},"Caching (Redis)":{title:"Redis University RU101",type:"Course",icon:"⚡",why:"missing from your skills"},"Authentication / security":{title:"OAuth2/JWT deep-dive + implement auth in a side project",type:"Project",icon:"🔐",why:"missing from your skills"}};
+  const out=[];gap.missing.forEach(m=>{if(map[m])out.push(map[m]);});
+  if(!out.length&&gap.coverage<100)out.push({title:"Deepen: "+gap.missing[0],type:"Course",icon:"📚",why:"round out your coverage"});
+  if(gap.coverage===100)out.push({title:"Build a distributed side project (e.g., event-driven URL shortener)",type:"Project",icon:"🚀",why:"you have full skill coverage — go deeper"});
+  return out.slice(0,3);
+}
+function addLearnFromRec(title,type){S.learning.push({id:uid(),title,type,total:10,done:0,unit:"modules",log:[]});save();render();toast("Added to learning");}
+function openLearn(){
+  openModal(`<h2>Track learning item</h2><label>Title</label><input id="lf_title" placeholder="e.g., NeetCode 150, DDIA, WGU term">
+  <label>Type</label><select id="lf_type">${LEARN_TYPES.map(t=>`<option>${t}</option>`).join("")}</select>
+  <div class="row"><div style="flex:1"><label>Total</label><input type="number" id="lf_total" value="10"></div><div style="flex:1"><label>Unit</label><input id="lf_unit" value="modules" placeholder="pages, problems, credits…"></div><div style="flex:1"><label>Done so far</label><input type="number" id="lf_done" value="0"></div></div>
+  <div class="row mt"><button class="btn primary" onclick="S.learning.push({id:uid(),title:$('#lf_title').value||'Untitled',type:$('#lf_type').value,total:+$('#lf_total').value||1,done:+$('#lf_done').value||0,unit:$('#lf_unit').value||'units',log:[]});save();closeModal();render()">Add</button><button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function logLearn(id){
+  const l=S.learning.find(x=>x.id===id);const v=+$("#lg_"+id).value;
+  if(!v)return toast("Enter an amount to log");
+  l.done=Math.min(l.total,l.done+v);if(l.log[0]!==today())l.log.unshift(today());
+  markActive();save();render();toast(`Logged +${v} ${l.unit} 🔥`);
+}
+/* ============ GITHUB ============ */
+async function connectGithub(){
+  const u=$("#ghuser").value.trim();if(!u)return toast("Enter a GitHub username");
+  toast("Fetching public GitHub data…");
+  try{
+    const [userRes,repoRes,evRes]=await Promise.all([
+      fetch(`https://api.github.com/users/${u}`),
+      fetch(`https://api.github.com/users/${u}/repos?per_page=100&sort=pushed`),
+      fetch(`https://api.github.com/users/${u}/events/public?per_page=100`)]);
+    if(!userRes.ok)throw new Error("User not found (or rate-limited — try again later)");
+    const user=await userRes.json(),repos=await repoRes.json(),events=evRes.ok?await evRes.json():[];
+    const languages={};let totalStars=0;
+    repos.forEach(r=>{if(r.language)languages[r.language]=(languages[r.language]||0)+1;totalStars+=r.stargazers_count;});
+    const sortedLangs=Object.fromEntries(Object.entries(languages).sort((a,b)=>b[1]-a[1]));
+    const pushDays={};let commits=0,prs=0;
+    events.forEach(e=>{const d=e.created_at.slice(0,10);if(e.type==="PushEvent"){pushDays[d]=(pushDays[d]||0)+(e.payload.commits?.length||1);commits+=e.payload.commits?.length||1;}if(e.type==="PullRequestEvent")prs++;});
+    S.github.username=u;S.github.lastSync=now();
+    S.github.data={name:user.name||u,publicRepos:user.public_repos,followers:user.followers,totalStars,
+      languages:sortedLangs,recentPushes:Object.keys(pushDays).length,commits,prs,pushDays,
+      repos:repos.map(r=>({name:r.name,description:r.description,language:r.language,stars:r.stargazers_count,url:r.html_url,pushed:r.pushed_at,fork:r.fork,size:r.size,hasIssues:r.open_issues_count})).filter(r=>!r.fork).slice(0,30)};
+    markActive();save();render();toast("GitHub connected ✓");
+  }catch(e){toast("⚠️ "+e.message);}
+}
+function viewGithub(){
+  const gh=S.github.data;
+  if(!gh)return `<div class="card" style="max-width:480px;margin:40px auto;text-align:center"><h3>🐙 Connect GitHub</h3>
+    <p class="small muted mb">Uses GitHub's public API — no password needed. (The production codebase includes full OAuth.)</p>
+    <input id="ghuser" placeholder="GitHub username" onkeydown="if(event.key==='Enter')connectGithub()"><button class="btn primary mt" onclick="connectGithub()">Connect</button></div>`;
+  const langs=Object.entries(gh.languages);const maxL=Math.max(...langs.map(l=>l[1]),1);
+  return `<div class="spread mb"><div><b style="font-size:16px">@${esc(S.github.username)}</b> <span class="muted small">synced ${new Date(S.github.lastSync).toLocaleString()}</span></div>
+  <div class="row"><input id="ghuser" value="${esc(S.github.username)}" style="width:160px"><button class="btn sm" onclick="connectGithub()">↻ Re-sync</button></div></div>
+  <div class="grid g4 mb">
+    <div class="card"><h3>Repos</h3><div class="big">${gh.publicRepos}</div></div>
+    <div class="card"><h3>Stars earned</h3><div class="big">⭐ ${gh.totalStars}</div></div>
+    <div class="card"><h3>Recent commits</h3><div class="big">${gh.commits}</div><div class="small muted">last ~90 events</div></div>
+    <div class="card"><h3>Recent PRs</h3><div class="big">${gh.prs}</div></div></div>
+  <div class="grid g2 mb">
+    <div class="card"><h3>Languages</h3>${langs.slice(0,6).map(([l,n])=>`<div class="spread small"><span>${esc(l)}</span><span class="muted">${n} repos</span></div><div class="progress mb"><div style="width:${100*n/maxL}%"></div></div>`).join("")}</div>
+    <div class="card"><h3>Contribution activity (recent)</h3><div class="streakbox">${(()=>{let h="";for(let i=55;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);h+=`<div class="d ${gh.pushDays[k]?"on":""}" title="${k}: ${gh.pushDays[k]||0} commits"></div>`;}return h;})()}</div><div class="small muted mt">${gh.recentPushes} active days in recent public events</div></div></div>
+  <div class="card"><h3>Repositories — select showcase ⭐, review, or generate README</h3>
+  <table><tr><th></th><th>Repo</th><th>Lang</th><th>Stars</th><th>Last push</th><th></th></tr>
+  ${gh.repos.map(r=>`<tr><td><input type="checkbox" ${S.github.showcase.includes(r.name)?"checked":""} onchange="toggleShowcase('${esc(r.name)}')" title="Showcase in portfolio"></td>
+    <td><a href="${esc(r.url)}" target="_blank"><b>${esc(r.name)}</b></a><div class="small muted">${esc((r.description||"").slice(0,70))}</div></td>
+    <td>${esc(r.language||"—")}</td><td>${r.stars}</td><td class="small muted">${fmtDate(r.pushed)}</td>
+    <td class="no-print"><button class="btn sm" onclick="aiCodeReview('${esc(r.name)}')">🔍 Review</button> <button class="btn sm" onclick="genReadme('${esc(r.name)}')">📝 README</button></td></tr>`).join("")}</table>
+  <div class="row mt"><button class="btn success" onclick="const r=S.resumes[0];if(r)genPortfolio(r.id);else toast('Create a resume first')">🌐 Build portfolio page with ${S.github.showcase.length} showcase repo(s)</button></div></div>`;
+}
+function toggleShowcase(name){const i=S.github.showcase.indexOf(name);if(i>=0)S.github.showcase.splice(i,1);else S.github.showcase.push(name);save();}
+async function aiCodeReview(name){
+  const r=S.github.data.repos.find(x=>x.name===name);
+  openModal(`<h2>🔍 AI code review — ${esc(name)}</h2><div id="crout" class="small muted">Analyzing repository structure…</div><button class="btn mt" onclick="closeModal()">Close</button>`);
+  let files=[],languages={};
+  try{
+    const [treeRes,langRes]=await Promise.all([
+      fetch(`https://api.github.com/repos/${S.github.username}/${name}/contents/`),
+      fetch(`https://api.github.com/repos/${S.github.username}/${name}/languages`)]);
+    if(treeRes.ok)files=(await treeRes.json()).map(f=>f.name);
+    if(langRes.ok)languages=await langRes.json();
+  }catch(e){}
+  const has=re=>files.some(f=>re.test(f));
+  const checks=[
+    {ok:has(/^readme/i),good:"README present — first thing reviewers look at",bad:"No README — add one (use the README generator)"},
+    {ok:has(/license/i),good:"License included",bad:"No LICENSE file — add MIT/Apache for open-source credibility"},
+    {ok:has(/^\.gitignore$/),good:".gitignore present",bad:"Missing .gitignore — node_modules/secrets may be committed"},
+    {ok:has(/test|spec|__tests__/i),good:"Test files/folder detected",bad:"No tests visible — even a few unit tests signal professionalism"},
+    {ok:has(/\.github|\.gitlab|jenkins|\.circleci/i)||has(/workflows/),good:"CI configuration detected",bad:"No CI — add a GitHub Actions workflow (lint + test)"},
+    {ok:has(/dockerfile|docker-compose/i),good:"Containerized (Docker)",bad:"Consider a Dockerfile for easy setup"},
+    {ok:has(/\.env\.example|\.env\.sample/i)||!has(/^\.env$/),good:"No committed .env detected",bad:"⚠️ .env file may be committed — check for leaked secrets!"},
+    {ok:!!r.description,good:"Repo description set",bad:"Add a one-line repo description — it shows in search & your profile"}];
+  const passed=checks.filter(c=>c.ok).length;
+  $("#crout").innerHTML=`<div class="spread"><b>Structure score</b><span class="badge ${passed>=6?"green":passed>=4?"yellow":"red"}">${passed}/${checks.length}</span></div>
+  ${checks.map(c=>`<div class="mt">${c.ok?"✅ "+esc(c.good):"❌ "+esc(c.bad)}</div>`).join("")}
+  <div class="mt"><b>Languages:</b> ${Object.keys(languages).join(", ")||esc(r.language||"—")}</div>
+  <div class="mt muted">High-level review based on repo structure & metadata (public API). Readability/security line-level review: paste code into the AI Coach, or use the production codebase's LLM-powered deep review.</div>`;
+}
+function genReadme(name){
+  const r=S.github.data.repos.find(x=>x.name===name);
+  const title=name.split(/[-_]/).map(w=>w[0]?.toUpperCase()+w.slice(1)).join(" ");
+  const md=`# ${title}
+
+${r.description||"> One-line description of what this project does and who it's for."}
+
+![Language](https://img.shields.io/badge/${encodeURIComponent(r.language||"code")}-blue) ![Stars](https://img.shields.io/badge/stars-${r.stars}-yellow)
+
+## Features
+
+- ✨ Feature 1 — what problem it solves
+- ⚡ Feature 2 — what makes it fast/different
+- 🔧 Feature 3 — extensibility/integrations
+
+## Quick Start
+
+\`\`\`bash
+git clone ${r.url}.git
+cd ${name}
+# install & run (adjust for your stack)
+npm install && npm start
+\`\`\`
+
+## Usage
+
+\`\`\`${(r.language||"bash").toLowerCase()}
+// Minimal example showing the core use case
+\`\`\`
+
+## Architecture
+
+Brief overview: main components, data flow, and key design decisions.
+
+## Roadmap
+
+- [ ] Planned improvement 1
+- [ ] Planned improvement 2
+
+## Contributing
+
+PRs welcome! Open an issue first for major changes.
+
+## License
+
+MIT © ${S.settings.name}
+`;
+  openModal(`<h2>📝 Generated README — ${esc(name)}</h2><textarea rows="16" id="rmout" style="font-family:ui-monospace,monospace">${esc(md)}</textarea>
+  <div class="row mt"><button class="btn primary" onclick="navigator.clipboard.writeText($('#rmout').value).then(()=>toast('Copied — paste into your repo'))">Copy</button>
+  <button class="btn" onclick="download('README.md',$('#rmout').value,'text/markdown')">Download .md</button><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+/* ============ AI COACH ============ */
+function coachContext(){
+  const rd=readiness();const gap=skillGap(S.settings.targetRole,S.resumes[0]);
+  const pc=pipelineCounts();const sp=salaryProjection();
+  return {rd,gap,pc,sp,ivAvg:interviewAvg(),sessions:S.sessions.length,streak:streakDays()};
+}
+function coachReply(msg){
+  const m=msg.toLowerCase();const ctx=coachContext();
+  const gapList=ctx.gap.missing.slice(0,4).join(", ")||"none — full coverage";
+  if(/study|learn.*today|today.*learn|focus today|what should i (do|study)/.test(m)){
+    const recs=learnRecs(ctx.gap);
+    const inFlight=S.learning.filter(l=>l.done<l.total).sort((a,b)=>b.done/b.total-a.done/a.total)[0];
+    return `Here's today's plan for your ${S.settings.targetTimeline}-month path to ${S.settings.targetRole}:\n\n1️⃣ Deep work (45–60 min): ${ctx.gap.missing[0]?`${ctx.gap.missing[0]} — your top skill gap. ${recs[0]?"Start with: "+recs[0].title:""}`:`advanced ${S.settings.targetRole} topics — your coverage is 100%`}\n\n2️⃣ Momentum (30 min): continue "${inFlight?inFlight.title:"a learning item"}" ${inFlight?`(${Math.round(100*inFlight.done/inFlight.total)}% done — closest to finishing)`:""}\n\n3️⃣ Interview reps (20 min): ${ctx.sessions<3?"you've only done "+ctx.sessions+" mock sessions — do a behavioral round in the Interview Center":ctx.ivAvg<70?"your mock average is "+ctx.ivAvg+" — drill your weakest format":"maintain with one quick technical quiz"}\n\n🔥 Your streak is ${ctx.streak} days — logging any of these keeps it alive. Want me to add these as today's focus tasks?`;
+  }
+  if(/ready.*(google|faang|interview|amazon|meta)|am i ready/.test(m)){
+    const verdict=ctx.rd.total>=75?"You're close to ready":ctx.rd.total>=55?"You're partially ready":"Not yet — but the path is clear";
+    return `${verdict}. Honest assessment for a top-tier interview:\n\n📊 Readiness: ${ctx.rd.total}/100\n• Resume: ${ctx.rd.parts.Resume}/100\n• Skill coverage: ${ctx.gap.coverage}% (missing: ${gapList})\n• Interview prep: ${ctx.sessions} mock sessions, avg ${ctx.ivAvg||"—"}\n• Consistency: ${ctx.rd.parts.Consistency}%\n\n${S.jobs.find(j=>j.company==="Google"&&j.rejection)?"⚠️ Note: your logged Google rejection cited system design depth — that must be your #1 focus before re-applying.\n\n":""}Gaps to close first:\n${ctx.gap.missing.slice(0,3).map((g,i)=>`${i+1}. ${g}`).join("\n")||"1. Volume of interview practice"}\n\nBenchmark: aim for 10+ mock sessions averaging 75+, and 80%+ skill coverage. Want a 4-week prep plan?`;
+  }
+  if(/improve.*resume|resume.*(improve|job|posting)|tailor/.test(m)){
+    const r=S.resumes[0];const sc=r?resumeScore(r):0;
+    return `Your top resume ("${r?r.name:"—"}") scores ${sc}/100. To improve it:\n\n1. Open Resume Manager → ✨ Optimize bullet points (rewrites weak openers, flags missing metrics)\n2. For a specific posting: 🎯 Tailor to job description — paste the JD and I'll show matched vs missing keywords${S.jobs.filter(j=>j.jd).length?` (you have JDs saved for: ${S.jobs.filter(j=>j.jd).map(j=>j.company).join(", ")})`:""}\n3. Quick wins I can see now:\n${r&&r.sections.experience.flatMap(e=>e.bullets).filter(b=>!/\d/.test(b)).length?`• ${r.sections.experience.flatMap(e=>e.bullets).filter(b=>!/\d/.test(b)).length} bullets have no metrics — quantify them\n`:""}• Add missing keywords: ${gapList}\n• Run the ATS check before every submission`;
+  }
+  if(/skill.*(missing|gap|senior)|mid.?level to senior|move.*senior|promotion/.test(m)){
+    return `Gap analysis for ${S.settings.targetRole} (senior trajectory):\n\n❌ Missing skills (${ctx.gap.missing.length}): ${gapList}\n✅ Covered (${ctx.gap.have.length}): ${ctx.gap.have.slice(0,6).join(", ")}\n\nBut senior isn't just skills — demonstrate:\n1. Scope: own a system end-to-end (design → deploy → operate). Your DevDash project is a good vehicle — add ${ctx.gap.missing[0]||"observability"} to it.\n2. Leverage: mentoring (you have ${S.contacts.filter(c=>c.type==="Mentee").length} mentees logged — grow this), design docs, tech talks\n3. Judgment: system design depth — trade-off articulation is the #1 senior interview differentiator\n\nSuggested project: build something that exercises ${ctx.gap.missing.slice(0,2).join(" + ")||"distributed systems patterns"} and write up the architecture decisions.`;
+  }
+  if(/network|outreach|message|follow.?up|linkedin/.test(m)){
+    const sugg=outreachSuggestions();
+    return `Networking status: ${S.contacts.length} contacts, ${sugg.length} need attention.\n\n${sugg.length?`Cooling relationships:\n${sugg.map(({c,score})=>`• ${c.name} (${c.company}) — score ${score}/100`).join("\n")}\n\nGo to Networking CRM → "Draft message" on any contact and I'll generate a personalized message based on your history with them.`:"All relationships are warm 👏"}\n\nTemplate tip: reference your last interaction, share a specific update, make one small ask. Never "just checking in."`;
+  }
+  if(/salary|worth|pay|compensation|negotiat/.test(m)){
+    const offers=S.jobs.filter(j=>j.offer);
+    return `Salary picture for ${S.settings.targetRole}:\n\n💰 Projected market value: ${fmt$(ctx.sp.est)} (range ${fmt$(ctx.sp.low)}–${fmt$(ctx.sp.high)}, based on ${ctx.gap.coverage}% skill coverage)\n${offers.length?`\n📋 Your current offer${offers.length>1?"s":""}: ${offers.map(j=>`${j.company} — ${fmt$(j.offer.base)} base + ${fmt$(j.offer.bonus)} bonus`).join("; ")}\n${offers.some(j=>(j.offer.base||0)<ctx.sp.est)?`⚠️ ${offers.filter(j=>(j.offer.base||0)<ctx.sp.est).map(j=>j.company).join(", ")} is below your projected value — you have room to negotiate. Counter with data (levels.fyi comps) and competing timelines.`:"Your offers are at/above projection 👏"}`:"\nNo offers yet — every additional skill you close raises this number. Closing your top 3 gaps could add ~$15–25k."}\n\n(General guidance, not financial advice.)`;
+  }
+  if(/plan|roadmap|month|week/.test(m)){
+    return `${S.settings.targetTimeline}-month roadmap to ${S.settings.targetRole}:\n\n📅 Months 1–2: Close top gaps (${ctx.gap.missing.slice(0,2).join(", ")||"deepen fundamentals"}) — 45 min/day\n📅 Months 3–4: Build a portfolio project exercising those skills; ship it publicly, write the README + architecture doc\n📅 Month 5: Interview ramp — 3 mock sessions/week (rotate behavioral/technical/design) until averaging 75+\n📅 Month 6+: Application sprint — 8–10 quality applications/week, tailored resume each time; keep a 2:1 practice:apply ratio\n\nOngoing: ${S.certs[0]?`finish ${S.certs[0].name} (${S.certs[0].progress}%)`:"one certification"}, weekly networking touch (2–3 contacts).\n\nI can add this week's slice as goals — just say "add this week's goals".`;
+  }
+  if(/add.*goal|this week'?s goal/.test(m)){
+    const gs=[`Study ${ctx.gap.missing[0]||"advanced topics"} — 45 min × 5 days`,"Complete 2 mock interview sessions","Send 3 networking messages","Apply to 5 tailored roles"];
+    gs.forEach(t=>S.goals.push({id:uid(),text:t,done:false}));save();
+    return `Done ✓ Added 4 goals to your dashboard:\n${gs.map(g=>"• "+g).join("\n")}`;
+  }
+  if(/project|build|portfolio/.test(m)){
+    return `Project ideas targeted at your gaps (${gapList}):\n\n1. 🔗 Event-driven URL shortener — covers ${ctx.gap.missing.includes("Message queues (Kafka/SQS)")?"message queues, ":""}caching, system design; small scope, high interview mileage\n2. 📊 Observability-first API — a service with metrics, tracing, and alerts baked in (${ctx.gap.missing.includes("Observability / monitoring")?"closes your observability gap":"strong senior signal"})\n3. ☸️ Deploy an existing project to Kubernetes with CI/CD — infra skills without writing a new app\n\nRule: one project done > three started. Pick one, add it in Learning Dashboard with milestones, and showcase it via GitHub → portfolio builder.`;
+  }
+  return `I have full context on your career data:\n\n📊 Readiness ${ctx.rd.total}/100 · Skill coverage ${ctx.gap.coverage}% · ${S.jobs.filter(j=>!["wishlist","rejected"].includes(j.stage)).length} active applications · ${ctx.streak}-day streak\n\nAsk me things like:\n• "What should I study today?"\n• "Am I ready for a Google interview?"\n• "How do I improve my resume?"\n• "What skills am I missing for senior?"\n• "Give me a roadmap" / "Add this week's goals"\n• "Draft networking messages" / "Am I being paid fairly?"`;
+}
+function viewCoach(){
+  return `<div class="chat"><div class="chatlog" id="chatlog">${S.coach.map(m=>`<div class="msg ${m.role}">${esc(m.text)}</div>`).join("")}</div>
+  <div class="row mt no-print"><input id="coachin" placeholder="Ask your career coach…" onkeydown="if(event.key==='Enter')sendCoach()" style="flex:1">
+  ${("webkitSpeechRecognition"in window||"SpeechRecognition"in window)?`<button class="btn" onclick="voiceCoach()" title="Voice command">🎙️</button>`:""}
+  <button class="btn primary" onclick="sendCoach()">Send</button>
+  <button class="btn ghost" title="Clear chat" onclick="S.coach=[];save();render()">🗑</button></div></div>`;
+}
+function sendCoach(){
+  const v=$("#coachin").value.trim();if(!v)return;
+  S.coach.push({role:"user",text:v});save();render();
+  setTimeout(()=>{S.coach.push({role:"ai",text:coachReply(v)});markActive();save();render();},350);
+}
+function voiceCoach(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const r=new SR();
+  r.onresult=e=>{const t=e.results[0][0].transcript;$("#coachin").value=t;
+    if(/start.*(mock|interview)/i.test(t)){nav("interview");startIV(/design/i.test(t)?"design":/tech|coding/i.test(t)?"technical":"behavioral");toast("🎙️ Voice command: starting mock interview");}
+    else sendCoach();};
+  r.start();toast("Listening…");
+}
+/* ============ ANALYTICS ============ */
+function viewAnalytics(){
+  const rd=readiness();
+  const weeks=[];for(let i=7;i>=0;i--){const start=new Date();start.setDate(start.getDate()-start.getDay()-i*7);const key=start.toISOString().slice(0,10);
+    const count=S.jobs.filter(j=>{const log=(j.statusLog||[]).find(l=>l.stage==="applied");const d=log?log.date:j.created;const dd=new Date(d);return dd>=start&&dd<new Date(+start+7*864e5);}).length;
+    weeks.push({label:key.slice(5),count});}
+  const maxW=Math.max(...weeks.map(w=>w.count),1);
+  const applied=S.jobs.filter(j=>j.stage!=="wishlist");
+  const reached=s=>S.jobs.filter(j=>(j.statusLog||[]).some(l=>l.stage===s)||j.stage===s).length;
+  const funnel=[["Applied",applied.length],["Screens",reached("phone_screen")+reached("oa")],["Onsites",reached("onsite")],["Offers",reached("offer")]];
+  const maxF=Math.max(...funnel.map(f=>f[1]),1);
+  const winRate=applied.length?Math.round(100*reached("offer")/applied.length):0;
+  const gap=skillGap(S.settings.targetRole,S.resumes[0]);
+  return `<div class="grid g4 mb">
+    <div class="card"><h3>Win rate</h3><div class="big">${winRate}%</div><div class="small muted">offers / applications</div></div>
+    <div class="card"><h3>Response rate</h3><div class="big">${applied.length?Math.round(100*(reached("phone_screen")+reached("oa"))/applied.length):0}%</div><div class="small muted">screens / applications</div></div>
+    <div class="card"><h3>Skills coverage</h3><div class="big">${gap.coverage}%</div><div class="small muted">${esc(S.settings.targetRole)}</div></div>
+    <div class="card"><h3>Mock interview avg</h3><div class="big">${interviewAvg()||"—"}</div><div class="small muted">${S.sessions.length} sessions</div></div></div>
+  <div class="grid g2">
+    <div class="card"><h3>Applications per week</h3><div class="bars" style="margin-bottom:24px">${weeks.map(w=>`<div class="bar" style="height:${100*w.count/maxW}%"><b>${w.count||""}</b><span>${w.label}</span></div>`).join("")}</div></div>
+    <div class="card"><h3>Pipeline funnel</h3>${funnel.map(([l,n])=>`<div class="spread small"><span>${l}</span><b>${n}</b></div><div class="progress mb"><div style="width:${100*n/maxF}%"></div></div>`).join("")}</div>
+    <div class="card"><h3>Readiness breakdown</h3>${Object.entries(rd.parts).map(([k,v])=>`<div class="spread small"><span>${k}</span><b>${v}</b></div><div class="progress mb"><div style="width:${v}%"></div></div>`).join("")}</div>
+    <div class="card"><h3>Interview score trend</h3>${S.sessions.length?`<div class="bars" style="margin-bottom:24px">${S.sessions.slice(-10).map(s=>`<div class="bar" style="height:${s.score}%;background:${s.score>=70?"var(--accent2)":"var(--warn)"}"><b>${s.score}</b><span>${s.type.slice(0,4)}</span></div>`).join("")}</div>`:'<div class="muted small">Complete mock interviews to see your trend.</div>'}</div></div>`;
+}
+/* ============ SETTINGS ============ */
+function viewSettings(){
+  return `<div class="grid g2">
+  <div class="card"><h3>Profile</h3>
+    <label>Name</label><input value="${esc(S.settings.name)}" onchange="S.settings.name=this.value;save()">
+    <label>Target role</label><select onchange="S.settings.targetRole=this.value;save();render()">${Object.keys(ROLE_SKILLS).map(r=>`<option ${S.settings.targetRole===r?"selected":""}>${r}</option>`).join("")}</select>
+    <label>Target timeline (months)</label><input type="number" value="${S.settings.targetTimeline}" onchange="S.settings.targetTimeline=+this.value;save()">
+    <label>Theme</label><div class="row"><button class="btn sm ${S.settings.theme==="dark"?"primary":""}" onclick="S.settings.theme='dark';save();applyTheme();render()">🌙 Dark</button><button class="btn sm ${S.settings.theme==="light"?"primary":""}" onclick="S.settings.theme='light';save();applyTheme();render()">☀️ Light</button></div></div>
+  <div class="card"><h3>🤖 Automation workflows</h3>
+    ${S.automations.map(a=>`<div class="checkitem"><input type="checkbox" ${a.on?"checked":""} onchange="S.automations.find(x=>x.id==='${a.id}').on=!${a.on};save()"><label><b>When ${esc(a.trigger.replace(/_/g," "))}</b> → ${esc(a.action)}</label></div>`).join("")}
+    <div class="small muted mt">Automations fire automatically (e.g., completing a certification updates your resume skills and queues a LinkedIn post task).</div></div>
+  <div class="card"><h3>Backup & recovery</h3>
+    <div class="row"><button class="btn primary" onclick="download('careeros-backup-'+today()+'.json',JSON.stringify(S,null,2),'application/json');toast('Backup downloaded')">⬇ Export full backup (JSON)</button></div>
+    <label>Restore from backup</label><input type="file" accept=".json" onchange="importBackup(this)">
+    <div class="row mt"><button class="btn sm" onclick="exportJobsCSV()">Jobs CSV</button><button class="btn sm" onclick="exportContactsCSV()">Contacts CSV</button><button class="btn sm" onclick="if(S.resumes[0])exportResumePDF(S.resumes[0].id)">Resume PDF</button></div></div>
+  <div class="card"><h3>Data</h3>
+    <div class="small muted mb">All data lives in your browser's localStorage — nothing is sent to any server. Offline-first by design.</div>
+    <div class="row"><button class="btn danger" onclick="if(confirm('Erase ALL data and restore demo seed?')){localStorage.removeItem(LS_KEY);location.reload();}">Reset to demo data</button>
+    <button class="btn danger" onclick="if(confirm('Erase ALL data and start empty?')){const s=defaultState();localStorage.setItem(LS_KEY,JSON.stringify(s));location.reload();}">Start fresh (empty)</button></div></div>
+  <div class="card"><h3>About / platform notes</h3>
+    <div class="small muted">This is the standalone web build of CareerOS. The production codebase (Next.js + PostgreSQL) adds: SSO via NextAuth, real GitHub OAuth, LLM-powered coach (Anthropic/OpenAI), push notifications, email digests, and role-based mentor access. Voice features use your browser's Web Speech API. Works offline after first load.</div></div>
+  </div>`;
+}
+function importBackup(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const data=JSON.parse(r.result);if(!data.settings)throw new Error("bad file");S=Object.assign(defaultState(),data);save();applyTheme();render();toast("Backup restored ✓");}catch(e){toast("⚠️ Invalid backup file");}};
+  r.readAsText(f);
+}
+/* ============ INIT ============ */
+applyTheme();render();
+</script>
+</body>
+</html>
